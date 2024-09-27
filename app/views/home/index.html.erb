@@ -1,0 +1,260 @@
+<div class="container">
+
+  
+  <div class="row">
+    <div class="col">
+      <h3 class="mb-3">Transaction Feed</h3>
+    </div>
+
+    <div class="col text-end">
+      <button class="btn btn-success" onclick="addCustomTransaction()">Add custom transaction</button>
+    </div>
+  </div>
+  
+
+  <h6><%= @transactions.count %> unprocessed items</h6>
+
+
+  <% @transactions.each do |t| %>
+
+    <div class="card mb-3" data-uid="<%= t.feedItemUid %>">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between">
+
+          <div class="container">
+             <div class="row">
+              <div class="col">£<%= ('%.2f' % (t.amount_pennies.to_f / 100).round(2)) %> (<%= t.direction %>)</div>
+              <div class="col">At: <%= t.transaction_timestamp %></div>
+            </div>
+
+            <div class="row">
+              <div class="col">From: <%= t.account_name %></div>
+              <div class="col">Ref: <%= t.reference %></div>
+            </div>
+          </div>
+
+          <% Apartment.all.each do |a| %>
+              <input type="submit" data-apartment_id="<%= a.id %>" data-transaction_id="<%= t.id %>" class="btn btn-sm btn-<%= a.colour %> mx-1" onclick="selectApartment(this)" value="<%= a.name %>">
+          <% end %>
+          
+          
+          <input type="submit" class="btn btn-sm btn-danger mx-1" value="Hide" class="btn-split" data-transaction_id="<%= t.id %>" onclick="hide(this)">
+          <input type="submit" class="btn btn-sm btn-warning mx-1" value="Split..." class="btn-split" data-transaction-id="<%= t.id %>" onclick="split(this, <%= t.amount_pennies %>)">
+
+          
+        </div>
+
+      </div>
+    </div>
+
+  <% end %>
+
+  <div class="apple_pagination">
+  <div class="page_info">
+    <%= page_entries_info @transactions %>
+  </div>
+  <%= will_paginate @transactions, :container => false %>
+</div>
+</div>
+
+
+<script>
+
+var apartments = <%= raw Apartment.all.pluck(:id, :name) %>;
+var expenseTypes = <%= raw ExpenseType.all.map { |et| { et.id => et.name } }.reduce({}, :merge).to_json %>;
+
+
+function buildCustomHtml(withDate = false) 
+{
+
+  html = ''
+  for(var apt in apartments) {
+    html += "<div class='row mb-1 split-section'>"
+    id = apartments[apt][0]
+    name = apartments[apt][1]
+    html += "<div class='col' data-apartment-id='"+ id +"'>" + name + "</div>"
+    
+    html += "<div class='col'>"
+    html += "<input type='text' class='form-control split-input'>"
+    html += "</div>"
+    html += "</div>"
+  }
+
+  if(withDate) {
+    html += "<label class='text-start'>Date of purchase</label>"
+    html += "<input type='date' class='form-control date-of-purchase'>"
+    html += "<label class='text-start'>Purchase method</label>"
+    html += "<select class='form-select payment-method'>"
+    html += "<option value='cash'>Cash</option>"
+    html += "<option value='business_bank'>Business Bank</option>"
+    html += "<option value='personal_bank'>Personal Bank</option>"
+     html += "</select>"
+  }
+
+
+  return html
+
+}
+
+
+async function addCustomTransaction(){
+
+  html = buildCustomHtml(true);
+
+  const { value: formValues } = await Swal.fire({
+    title: "Allocate custom transaction",
+    html: html,
+    focusConfirm: false,
+    preConfirm: async () => {
+
+      sections = document.querySelectorAll('.split-section')
+
+      amounts = [];
+
+      sections.forEach((element) => {
+        amounts.push({
+            apartment_id: element.querySelector('[data-apartment-id]').getAttribute('data-apartment-id'), 
+            amount: element.querySelector('.split-input').value
+        })
+      });
+
+      date = document.querySelector('.date-of-purchase').value
+      paymentMethod = document.querySelector('.payment-method').value
+
+      await Swal.fire({
+      title: "Select expense category...",
+      input: 'select',
+      inputOptions: expenseTypes,
+      inputPlaceholder: 'Select category',
+      showCancelButton: true,
+      preConfirm: async () => {
+        expenseTypeId = document.querySelector("#swal2-select").value
+        payload = {
+          amounts: amounts,
+          expense_type_id: expenseTypeId,
+          date_of_purchase: date,
+          payment_method: paymentMethod
+        }
+
+        const res = fetch('/apartment_transactions', {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          method: "POST",
+          body: JSON.stringify(payload)
+       })
+
+        location.reload();
+
+      }
+    })
+
+    }
+  });
+
+
+}
+
+async function hide(e) {
+     const res = await fetch('/apartment_transaction', {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        method: "DELETE",
+        body: JSON.stringify({ 
+          transaction_id: e.getAttribute('data-transaction_id')
+        })
+      })
+
+    location.reload();
+
+}
+
+async function selectApartment(e) {
+
+    const { value: formValues } = await Swal.fire({
+      title: "Select expense category...",
+      input: 'select',
+      inputOptions: expenseTypes,
+      inputPlaceholder: 'Select category',
+      showCancelButton: true,
+      preConfirm: async () => {
+        expenseTypeId = document.querySelector("#swal2-select").value
+        const res = await fetch('/apartment_transaction', {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        method: "POST",
+        body: JSON.stringify({ 
+          apartment_id: e.getAttribute('data-apartment_id'),
+          transaction_id: e.getAttribute('data-transaction_id'),
+          expense_type_id: expenseTypeId
+        })
+      })
+      
+      location.reload();
+
+      }
+    })
+}
+
+async function split(e, amount){
+
+  html = buildCustomHtml();
+  
+  var transaction_id = e.getAttribute('data-transaction-id')
+  const { value: formValues } = await Swal.fire({
+    title: "Allocate transaction (£"+(amount/100).toFixed(2)+")",
+    html: html,
+    focusConfirm: false,
+    preConfirm: async () => {
+
+      sections = document.querySelectorAll('.split-section')
+
+      amounts = [];
+
+      sections.forEach((element) => {
+        amounts.push({
+            apartment_id: element.querySelector('[data-apartment-id]').getAttribute('data-apartment-id'), 
+            transaction_id: transaction_id,
+            amount: element.querySelector('.split-input').value
+        })
+      });
+
+      await Swal.fire({
+      title: "Select expense category...",
+      input: 'select',
+      inputOptions: expenseTypes,
+      inputPlaceholder: 'Select category',
+      showCancelButton: true,
+      preConfirm: async () => {
+        expenseTypeId = document.querySelector("#swal2-select").value
+        payload = {
+          amounts: amounts,
+          expense_type_id: expenseTypeId
+        }
+        const res = fetch('/apartment_transactions', {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          method: "POST",
+          body: JSON.stringify(payload)
+       })
+
+        location.reload();
+
+      }
+    })
+
+    }
+  });
+
+
+  return 
+}
+</script>
