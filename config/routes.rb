@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resource :apartment_transaction
   
   resources :cleaning 
+  resources :deposits 
 
   
   post '/apartment_transactions', to: 'apartment_transactions#create_many'

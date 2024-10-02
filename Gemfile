@@ -56,6 +56,7 @@ gem 'cssbundling-rails'
 gem 'jsbundling-rails'
 
 
+
 # Use Sass to process CSS
 # gem "sassc-rails"
 
@@ -83,4 +84,9 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 
+end
+
+
+group :production do 
+  gem 'newrelic_rpm'
 end
