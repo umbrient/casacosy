@@ -15,7 +15,7 @@ class Booking < ApplicationRecord
 
 
   def guest_count
-    adults + children
+    (adults + children) rescue 'Unknown'
   end
 
 
