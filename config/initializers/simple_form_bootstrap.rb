@@ -73,6 +73,26 @@ SimpleForm.setup do |config|
     end
   end
 
+  config.wrappers :bootstrap, tag: 'div', class: 'form-group', error_class: 'has-error' do |b|
+    b.use :html5
+    b.use :placeholder
+    b.optional :maxlength
+    b.optional :minlength
+    b.optional :pattern
+    b.optional :min_max
+    b.optional :readonly
+
+    b.wrapper tag: 'div', class: 'col-md-12' do |ba|
+      ba.use :label, class: 'control-label'
+      ba.wrapper tag: 'div', class: 'input-group' do |bb|
+        bb.use :input, class: 'form-control'
+      end
+    end
+
+    b.use :error, wrap_with: { tag: 'span', class: 'help-block' }
+    b.use :hint, wrap_with: { tag: 'p', class: 'help-block' }
+  end
+
   # vertical input for radio buttons and check boxes
   config.wrappers :vertical_collection, item_wrapper_class: 'form-check', item_label_class: 'form-check-label', tag: 'fieldset', class: 'mb-3' do |b|
     b.use :html5
