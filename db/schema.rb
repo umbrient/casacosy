@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_27_161140) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_28_233844) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -85,6 +85,31 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_27_161140) do
 
   create_table "expense_types", force: :cascade do |t|
     t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "task_types", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "tasks", force: :cascade do |t|
+    t.integer "assigner_user_id"
+    t.integer "assignee_user_id"
+    t.integer "apartment_id"
+    t.string "assignee_name"
+    t.integer "task_type_id"
+    t.datetime "task_assigned"
+    t.datetime "task_due"
+    t.integer "booking_id"
+    t.decimal "rate_per_task"
+    t.string "status"
+    t.boolean "qa_approved_timestamp"
+    t.boolean "qa_approver_user_id"
+    t.boolean "paid"
+    t.boolean "payment_acknowledged"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

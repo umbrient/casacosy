@@ -11,8 +11,8 @@
   <table class="table bordered">
     <thead>
       <th>Apartment</th>
-      <th>Clean needed today?</th>
-      <th>Clean needed tomorrow?  </th>
+      <th>Clean needed (<%= Date.today.strftime('%A') %>)?</th>
+      <th>Clean needed tomorrow (<%= (Date.today + 1).strftime('%A') %>)?  </th>
       <th>Why?</th>
     </thead>
 
