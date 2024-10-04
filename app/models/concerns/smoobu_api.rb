@@ -101,6 +101,7 @@ class SmoobuApi < Api
    private 
 
     def api_key 
-      @api_key ||= Rails.application.credentials.dig(:smoobu, :api_key)
+      @api_key ||= (Rails.application.credentials.dig(:smoobu, :api_key) || ENV['SMOOBU_API_KEY'])
+
     end
 end
