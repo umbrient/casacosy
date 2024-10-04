@@ -3,7 +3,7 @@ class HomeController < ApplicationController
 
 
   def index 
-    render plain: "You probably shouldn't be here."
+    
   end
 
   private 
