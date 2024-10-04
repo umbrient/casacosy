@@ -93,10 +93,14 @@ class SmoobuApi < Api
     
   end
 
+  def get_messages(reservation_id)
+    response = conn.get("/api/reservations/#{reservation_id}/messages?onlyRelatedToGuest=false" ) { |req| req.headers['Api-Key'] = api_key }
+    JSON.parse(response.body) if response.success?
+  end
+
    private 
 
     def api_key 
       @api_key ||= Rails.application.credentials.dig(:smoobu, :api_key)
     end
-
 end

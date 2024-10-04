@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_02_223308) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_03_121215) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -94,6 +94,21 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_02_223308) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "permissions", force: :cascade do |t|
+    t.integer "role_id"
+    t.string "controller"
+    t.string "action"
+    t.string "misc"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "roles", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "task_types", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -146,6 +161,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_02_223308) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
+    t.integer "role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

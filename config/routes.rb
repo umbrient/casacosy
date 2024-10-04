@@ -7,12 +7,13 @@ Rails.application.routes.draw do
 
   resource :apartment_transaction
   
+  resources :transactions 
   resources :cleaning 
-  resources :deposits 
+  resources :deposits
+  resources :cleaning_predictor
 
-  
   post '/apartment_transactions', to: 'apartment_transactions#create_many'
   
-  get '/cleans', to: 'home#cleans'
+
   get '/data', to: 'data#index'
 end

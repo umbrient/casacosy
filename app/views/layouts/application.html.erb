@@ -22,11 +22,12 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
-            <a class="nav-item nav-link" href="/">Transaction Feed</a>
-            <a class="nav-item nav-link" href="cleans">Cleaning Determiner</a>
-            <a class="nav-item nav-link" href="/data">Data</a>
-            <a class="nav-item nav-link" href="/cleaning">Cleaning</a>
-            <a class="nav-item nav-link" href="/deposits">Deposits</a>
+            <% %w(transactions cleaning_predictor data cleaning deposits).each do |link|
+                klass = link.classify.constantize rescue link.singularize.to_sym
+                next unless can?(:read, klass)
+            %>
+            <a class="nav-item nav-link" href="/<%= link%>"><%= link.titleize %> </a>
+            <% end %>
           </div>
         </div>
 
@@ -56,7 +57,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 
   </body>
 </html>

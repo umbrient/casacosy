@@ -3,4 +3,20 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
+
+  belongs_to :role
+
+
+  def is_admin? 
+    role.name.downcase == 'admin'
+  end
+
+  def is_manager? 
+    role.name.downcase == 'manager'
+  end
+
+
+
 end
+
+

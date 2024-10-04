@@ -30,4 +30,10 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  cleaning_predictor:
+    today:
+      clean: "<span class='text-success'>Clean today (%{weekday}) <i class='bi bi-check-circle'></i></span>"
+      no_clean: "<span class='text-danger'>No clean today (%{weekday}) <i class='bi bi-x-circle'></i></span>"
+    tomorrow:
+      clean: "<span class='text-success'>Clean tomorrow (%{weekday}) <i class='bi bi-check-circle'></i></span>"
+      no_clean: "<span class='text-danger'>No clean tomorrow (%{weekday}) <i class='bi bi-x-circle'></i></span>"

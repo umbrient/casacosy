@@ -37,6 +37,8 @@ gem "simple_form"
 
 gem 'whenever', require: false
 
+gem "cancancan"
+gem "nokogiri"
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"

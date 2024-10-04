@@ -1,0 +1,88 @@
+<div class="container">
+
+  
+  <div class="row">
+    <div class="col">
+      <h3 class="mb-3">Cleans Determiner</h3>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <% @apartments.each do |a| %>
+
+      <div class="col pt-3">
+        <div class="card" style="width: 18rem;">
+          <div class="card-header">
+              <h5 class="card-title"><%= a.name %></h5>
+            </div>
+          <div class="card-body">
+
+            <div data-bs-toggle="tooltip"
+                data-bs-title="This top tooltip is themed via CSS variables." class="card-text"><%= (a.departure_today? ? t("cleaning_predictor.today.clean", weekday: @today) : t("cleaning_predictor.today.no_clean", weekday: @today)).html_safe %> </div>
+            <hr>
+            <p class="card-text"><%= (a.departure_tomorrow? ? t("cleaning_predictor.tomorrow.clean", weekday: @tomorrow) : t("cleaning_predictor.tomorrow.no_clean", weekday: @tomorrow)).html_safe %> </p>
+            <hr>
+            <b><%= Time.now > @cutoff_time ? 'Coming today...' : 'Currently hosting' %> (<i class='bi bi-person'></i>x <%= a&.current_booking&.guest_count || 0 %>)</b>
+          
+            <% if a.current_booking %>
+              <table class="table table-sm table-bordered mt-2">
+                <tr>
+                  <th>Name</th>
+                  <td><%= a.current_booking.guest_name %></td>
+                </tr>
+
+                <tr>
+                  <th>Number</th>
+                  <td><%= a.current_booking.phone %></td>
+                </tr>
+
+                <tr>
+                  <th>Platform</th>
+                  <td><%= a.current_booking.channel.name %></td>
+                </tr>
+
+                <tr>
+                  <th>Booked</th>
+                  <td><%= distance_of_time_in_words(Time.current, a.current_booking.data_created_at) %> ago </td>
+                </tr>  
+
+                <tr>
+                  <th>Arrival</th>
+                  <td><%= a.current_booking.arrival %> </td>
+                </tr>    
+
+                <tr>
+                  <th>Duration</th>
+                  <td><%= distance_of_time_in_words(a.current_booking.arrival, a.current_booking.departure) %> </td>
+                </tr>    
+
+                <tr>
+                  <th>Departure</th>
+                  <td><%=  a.current_booking.departure %> </td>
+                </tr>    
+
+                <tr>
+                  <th>New Code</th>
+                  <td><%= a.current_booking.code || '@ 11AM'  %></td>
+                </tr>    
+
+
+              </table>
+              <% else  %>
+                <div class='alert alert-light m-1'>No one's here.</div>
+              <% end %>
+          </div>
+
+          <div class="card-footer">
+            Previous code was <b><%= a.previous_booking.code || 'N/A' %></b>
+          </div>
+        </div>
+      </div>
+
+    <% end %>
+    
+  </div>
+
+
+</div>

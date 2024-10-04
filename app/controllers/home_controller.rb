@@ -1,20 +1,10 @@
 class HomeController < ApplicationController
-  
-  before_action :authenticate_user!, :starling_api
+  load_and_authorize_resource class: false
 
 
   def index 
-    # starling_api.get_transactions
-    # smoobu_api.get_all_past_reservations
-
-    @transactions = Transaction.unprocessed.settled.order(transaction_timestamp: :desc).paginate(page: params[:page], per_page: 20)
-
+    render plain: "You probably shouldn't be here."
   end
-
-  def cleans 
-    @apartments = Apartment.all 
-  end
-
 
   private 
 
