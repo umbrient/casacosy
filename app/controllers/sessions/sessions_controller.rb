@@ -15,7 +15,6 @@ class Sessions::SessionsController < Devise::SessionsController
 
   # DELETE /resource/sign_out
   def destroy
-    byebug
     super
   end
 

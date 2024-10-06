@@ -22,7 +22,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
-            <% %w(transactions cleaning_predictor data cleaning deposits).each do |link|
+            <% %w(transactions cleaning_predictor data cleaning deposits sync).each do |link|
                 klass = link.classify.constantize rescue link.singularize.to_sym
                 next unless can?(:read, klass)
             %>

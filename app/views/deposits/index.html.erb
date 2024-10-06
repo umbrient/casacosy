@@ -1,1 +1,138 @@
-just a bite. >:)
+<div class="d-flex align-items-center pb-5">
+  <h3 class='pe-3'>Upcoming bookings</h3> <h5>(Next 24h)</h5>
+</div>
+
+<table class='table table-striped'>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Platform</th>
+      <th>Dates</th>
+      <th>Apartment</th>
+      <th>Price</th>
+      <th>ID Status</th>
+      <th>Deposit Status</th>
+      <th>Terms & Conditions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @upcoming_bookings.each do |booking| %>
+      <tr data-id="<%= booking.id %>">
+        <td><%= ("#{booking.guest_name} (<i class='bi bi-person'></i>x#{booking.guest_count})").html_safe %></td>
+        <td><%= booking.channel.name %></td>
+        <td><%= "#{booking.arrival} (#{distance_of_time_in_words(booking.arrival, booking.departure)})" %> </td>
+        <td><%= booking.apartment.name %> </td>
+        <td>£<%= "#{booking.price}" %></td>
+        <td><%= booking.id_status %></td>
+        <td><%= booking.deposit_status %></td>
+        <td><%= booking.terms_status %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+
+<h3 class='py-5'>Previous bookings</h3>
+
+
+
+<table class='table table-striped table-boredered' style='opacity:.3'>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Platform</th>
+      <th>Dates</th>
+      <th>Apartment</th>
+      <th>Price</th>
+      <th>ID Status</th>
+      <th>Deposit Status</th>
+      <th>Terms & Conditions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @previous_bookings.each do |booking| %>
+      <tr data-id="<%= booking.id %>">
+        <td><%= ("#{booking.guest_name} <i class='bi bi-user'></i>x#{booking.guest_count}").html_safe %></td>
+        <td><%= booking.channel.name %></td>
+        <td><%= "#{booking.arrival} (#{distance_of_time_in_words(booking.arrival, booking.departure)})" %> </td>        <td><%= booking.apartment.name %> </td>
+        <td>£<%= "#{booking.price}" %></td>
+        <td><span class='badge text-bg-warning'>Requested</span></td>
+        <td><span class='badge text-bg-warning'>Requested</span></td>
+        <td><span class='badge text-bg-warning'>Requested</span></td>
+      </tr>
+
+    <% end %>
+  </tbody>
+</table>
+
+
+<script>
+
+  function buildLogsTable(arr){
+
+    html = "<table class='table table-striped table-sm'>"
+    html += "<tr><td>Agent</td><td>Action</td><td>Time</td></tr>"
+    for (let i = 0; i < arr.length; i++) {
+      const element = arr[i];
+      const user = element.user;
+      const action = element.action;
+      const time = element.time;
+
+      html += `<tr><td>${user}</td><td>${action}</td><td>${time}</td></tr>`;
+ 
+    }
+    html += "</table>"
+
+    return html
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+
+    var tags = document.querySelectorAll(".deposit-tag, .id-tag, .terms-tag");
+
+    tags.forEach(function(el) {
+      el.addEventListener("click", function(elem) {
+
+
+        bookingId = elem.target.closest("tr").getAttribute("data-id")
+        type = elem.target.getAttribute("data-type")
+        
+        if (!bookingId || !type) return;
+
+        html = "No audit trail to show.";
+        fetch("/requests?booking_id=" + bookingId + "&type=" + type).then(res => res.json())
+        .then(data => {
+
+          logs = data['logs'];
+          
+          if (logs.length > 0) {
+            html = buildLogsTable(logs);
+          }
+
+          Swal.fire({
+          title: 'Select an action',
+          input: 'select',
+          html: `${html}`,
+          inputOptions: {
+            'value1': 'Request action',
+            'value2': 'Cancel action request',
+            'value3': 'Preview link sent to guest '
+          },
+          inputPlaceholder: 'Choose an option',
+          showCancelButton: true,
+          confirmButtonText: 'Submit',
+          cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              if (result.value) {
+                Swal.fire(`You selected: ${result.value}`);
+              }
+            }
+          });
+        });
+      });
+    });
+  });
+</script>

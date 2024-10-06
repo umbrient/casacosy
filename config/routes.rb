@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :cleaning 
   resources :deposits
   resources :cleaning_predictor
+  resources :requests
 
   post '/apartment_transactions', to: 'apartment_transactions#create_many'
   
