@@ -12,6 +12,7 @@ class Request < ApplicationRecord
     viewed: 'Viewed',
     signed: 'Signed',
     uploaded: 'Uploaded',
+    paid: 'Paid',
     approved: 'Approved',
     cancelled: 'Cancelled',
     unnecessary: 'Unnecessary',

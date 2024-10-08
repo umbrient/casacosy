@@ -15,6 +15,6 @@ Rails.application.routes.draw do
 
   post '/apartment_transactions', to: 'apartment_transactions#create_many'
   
-
   get '/data', to: 'data#index'
+  get '/bookings/previous-codes', to: 'bookings#previous_codes'
 end

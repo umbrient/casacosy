@@ -17,6 +17,20 @@ class RequestsController < ApplicationController
     else 
       render json: "No recorded message"
     end
+  end
+
+  def create 
+
+    booking = Booking.find request_params[:booking_id] 
+    return unless booking 
+
+    r = Request.new(booking_id: booking.id, request_type: request_params[:type], action: request_params[:action], user_id: current_user.id)
+
+    if r.save 
+      render json: { msg: "Request created successfully." }
+    else 
+      render json: { msg: "An unknown error occurred. Request was not created." }
+    end
 
   end
 
@@ -25,6 +39,6 @@ class RequestsController < ApplicationController
 
 
   def request_params
-    params.permit(:type, :booking_id)
+    params.permit(:type, :booking_id, :action)
   end 
 end
