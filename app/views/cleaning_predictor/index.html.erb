@@ -77,7 +77,7 @@
           <div class="card-footer">
             <div class="d-flex justify-content-between">
               <div>Previous code was <b> <%= a.previous_booking.code || 'N/A' %></b></div>
-              <div><a data-booking_id="<%= a.current_booking.id %>" class='link-underline-primary more-codes' style='cursor: pointer;'>more...</a></div>
+              <div><a data-booking_id="<%= a&.current_booking&.id %>" class='link-underline-primary more-codes' style='cursor: pointer;'>more...</a></div>
             </div>
           </div>
         </div>
