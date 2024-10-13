@@ -1,9 +1,7 @@
 class ApplicationController < ActionController::Base
   check_authorization unless: :devise_controller?
   before_action :authenticate_user!
-
-
-
+  
   def sync_bookings 
     smoobu_api.get_all_past_reservations
   end

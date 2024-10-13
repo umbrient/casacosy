@@ -88,66 +88,74 @@
     return html
   }
 
+  function formatOptions(arr) {
+    return arr.reduce(function (acc, e) {
+      acc[e] = e.charAt(0).toUpperCase() + e.slice(1);
+      return acc;
+    }, {});
+  }
+
   function lookupIDOptions(currentStatus){
     var map = {
           'not requested': ['request', 'unnecessary'],
-          'requested': ['re-request', 'cancel', 'unnecessary'],
-          'viewed': ['re-request', 'cancel', 'unnecessary'],
-          'uploaded': ['approve', 'reject', 're-request', 'unnecessary'],
-          'approved': ['re-request', 'unnecessary'],
-          'cancelled': ['re-request', 'unnecessary'],
-          'unnecessary': ['re-request'],
-          'rejected': ['re-request', 'unnecessary'],
+          'requested': ['rerequest', 'cancel', 'unnecessary'],
+          'viewed': ['rerequest', 'cancel', 'unnecessary'],
+          'uploaded': ['approve', 'reject', 'rerequest', 'unnecessary'],
+          'approved': ['rerequest', 'unnecessary'],
+          'cancelled': ['rerequest', 'unnecessary'],
+          'unnecessary': ['rerequest'],
+          'rejected': ['rerequest', 'unnecessary'],
           're-requested': ['cancel', 'unnecessary']
     }
-    return map[currentStatus.toLowerCase()]
+    return formatOptions(map[currentStatus.toLowerCase()]);
   }
 
   function lookupDepositOptions(currentStatus){
     var map = {
           'not requested': ['request', 'unnecessary'],
-          'requested': ['re-request', 'cancel', 'unnecessary'],
-          'viewed': ['re-request', 'cancel', 'unnecessary'],
-          'paid': ['approve', 'reject', 're-request', 'unnecessary'],
-          'approved': ['re-request', 'unnecessary'],
-          'cancelled': ['re-request', 'unnecessary'],
-          'unnecessary': ['re-request'],
-          'rejected': ['re-request', 'unnecessary'],
+          'requested': ['rerequest', 'cancel', 'unnecessary'],
+          'viewed': ['rerequest', 'cancel', 'unnecessary'],
+          'paid': ['approve', 'reject', 'rerequest', 'unnecessary'],
+          'approved': ['rerequest', 'unnecessary'],
+          'cancelled': ['rerequest', 'unnecessary'],
+          'unnecessary': ['rerequest'],
+          'rejected': ['rerequest', 'unnecessary'],
           're-requested': ['cancel', 'unnecessary']
     }
-    return map[currentStatus.toLowerCase()]
+    return formatOptions(map[currentStatus.toLowerCase()]);
   }
 
   function lookupTermsOptions(currentStatus){
     var map = {
           'not requested': ['request', 'unnecessary'],
-          'requested': ['re-request', 'cancel', 'unnecessary'],
-          'viewed': ['re-request', 'cancel', 'unnecessary'],
-          'signed': ['approve', 'reject', 're-request', 'unnecessary'],
-          'approved': ['re-request', 'unnecessary'],
-          'cancelled': ['re-request', 'unnecessary'],
-          'unnecessary': ['re-request'],
-          'rejected': ['re-request', 'unnecessary'],
+          'requested': ['rerequest', 'cancel', 'unnecessary'],
+          'viewed': ['rerequest', 'cancel', 'unnecessary'],
+          'signed': ['approve', 'reject', 'rerequest', 'unnecessary'],
+          'approved': ['rerequest', 'unnecessary'],
+          'cancelled': ['rerequest', 'unnecessary'],
+          'unnecessary': ['rerequest'],
+          'rejected': ['rerequest', 'unnecessary'],
           're-requested': ['cancel', 'unnecessary']
     }
-    return map[currentStatus.toLowerCase()]
+    return formatOptions(map[currentStatus.toLowerCase()]);
   }
 
   function getActionOptions(type, currentStatus){
-    if(type == "id") lookupIDOptions(currentStatus)
-    else if (type == "deposit") lookupDepositOptions(currentStatus)
-    else if (type == "terms") lookupTermsOptions(currentStatus)
+    if(type == "id") return lookupIDOptions(currentStatus)
+    else if (type == "deposit") return lookupDepositOptions(currentStatus)
+    else if (type == "terms") return lookupTermsOptions(currentStatus)
   }
 
   document.addEventListener('DOMContentLoaded', function() {
 
-    var tags = document.querySelectorAll(".deposit-tag, .id-tag, .terms-tag");
+    const tags = document.querySelectorAll(".deposit-tag, .id-tag, .terms-tag");
 
     tags.forEach(function(el) {
       el.addEventListener("click", function(elem) {
-        bookingId = elem.target.closest("tr").getAttribute("data-id")
-        type = elem.target.getAttribute("data-type")
-        options = getActionOptions(type, currentStatus)
+        const bookingId = elem.target.closest("tr").getAttribute("data-id")
+        const type = elem.target.getAttribute("data-type")
+        const currentStatus = elem.target.innerText
+        const options = getActionOptions(type, currentStatus)
         
         if (!bookingId || !type) return;
 
@@ -165,7 +173,7 @@
           title: 'Select an action',
           input: 'select',
           html: `${html}`,
-          inputOptions: ,
+          inputOptions: options,
           inputPlaceholder: 'Choose an option',
           showCancelButton: true,
           confirmButtonText: 'Submit',
@@ -173,7 +181,43 @@
           }).then((result) => {
             if (result.isConfirmed) {
               if (result.value) {
-                Swal.fire(`You selected: ${result.value}`);
+              
+                Swal.fire({
+                  title: `Notes on why you have selected "${result.value}"`,
+                  input: 'textarea',
+                  inputPlaceholder: 'Enter your notes here',
+                  showCancelButton: true
+                }).then((notesResult) => {
+                  if (notesResult.isConfirmed) {
+                    const notes = notesResult.value;
+
+                    // Fetch request to POST data to the server
+                    fetch('/requests', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // if using Rails for CSRF protection
+                      },
+                      body: JSON.stringify({
+                        request_action: result.value,
+                        booking_id: bookingId,
+                        notes: notes,
+                        request_type: type
+                      })
+                    }).then(response => {
+                      if (response.ok) {
+                        Swal.fire('Success', 'Your request has been submitted.', 'success');
+                      } else {
+                        Swal.fire('Error', 'There was an issue submitting your request.', 'error');
+                      }
+                    }).catch(error => {
+                      Swal.fire('Error', 'Something went wrong.', 'error');
+                    });
+                  }
+                });
+
+
+
               }
             }
           });

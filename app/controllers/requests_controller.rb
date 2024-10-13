@@ -6,9 +6,9 @@ class RequestsController < ApplicationController
     type = request_params[:type]
     booking_id = request_params[:booking_id]
 
-    logs = Request.where(request_type: type, booking_id: booking_id ).select(:action, :user_id, :created_at).map do |r| 
+    logs = Request.where(request_type: type, booking_id: booking_id ).select(:request_action, :user_id, :created_at).map do |r| 
       # -1 = Machine, 0 = Guest, >0 = User
-      { action: r.action, user: r.user_id > 0 ? r.user.name : (r.user_id == -1 ? 'Machine' : 'Guest'), time: r.created_at.strftime("%d-%m-%y %H:%M:%S") }
+      { action: r.action_past_tense.capitalize, user: r.user_id > 0 ? r.user.name : (r.user_id == -1 ? 'Machine' : 'Guest'), time: r.created_at.strftime("%d-%m-%y %H:%M:%S") }
 
     end
 
@@ -21,10 +21,12 @@ class RequestsController < ApplicationController
 
   def create 
 
-    booking = Booking.find request_params[:booking_id] 
+    byebug 
+
+    booking = Booking.find create_params[:booking_id] 
     return unless booking 
 
-    r = Request.new(booking_id: booking.id, request_type: request_params[:type], action: request_params[:action], user_id: current_user.id)
+    r = Request.new(booking_id: booking.id, request_type: create_params[:type], request_action: create_params[:request_action], user_id: current_user.id)
 
     if r.save 
       render json: { msg: "Request created successfully." }
@@ -39,6 +41,10 @@ class RequestsController < ApplicationController
 
 
   def request_params
-    params.permit(:type, :booking_id, :action)
+    params.permit(:type, :booking_id, :request_action)
+  end 
+
+  def create_params
+    params.require(:request).permit(:type, :booking_id, :request_action, :notes, :request_type)
   end 
 end
