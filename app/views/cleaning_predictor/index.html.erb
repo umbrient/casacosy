@@ -1,17 +1,24 @@
 <div class="container">
 
-  
+  <div class="row">
+    <div class="col text-center">
+      <h5>Showing <%= "#{@today.to_date} (#{@todays_day})" %></h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col d-flex justify-content-between mb-3">
+      <%= link_to '-1 Day <i class="bi bi-caret-left"></i>'.html_safe, "/?date=#{@yesterday}", method: :get, class: 'btn btn-secondary' %>
+      <%= link_to 'Today', root_path, method: :get, class: 'btn btn-primary' %>
+      <%= link_to '<i class="bi bi-caret-right"></i> +1 Day'.html_safe, "/?date=#{@tomorrow}", method: :get, class: 'btn btn-secondary' %>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col">
       <div class="d-flex align-items-center">
           <h3 class="mb-3 me-3">Cleans Determiner</h3>
-          <h5>(<%= "#{@today.to_date} - #{@todays_day}" %>)</h5>
       </div>
-    </div>
-    <div class="col text-end">
-      <%= link_to '-1 Day <i class="bi bi-caret-left"></i>'.html_safe, "/?date=#{@yesterday}", method: :get, class: 'btn btn-secondary' %>
-      <%= link_to 'Today', root_path, method: :get, class: 'btn btn-primary' %>
-      <%= link_to '<i class="bi bi-caret-right"></i> +1 Day'.html_safe, "/?date=#{@tomorrow}", method: :get, class: 'btn btn-secondary' %>
     </div>
   </div>
 
