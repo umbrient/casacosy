@@ -1,0 +1,186 @@
+<div class="d-flex align-items-center pb-5">
+  <h3 class='pe-3'><%= @booking.guest_name %></h3> <h5>(Ref: <%= @booking.reference_id %>)</h5>
+</div>
+
+
+<h4 class='pb-3'>Booking details</h4>
+<table class="table table-striped table-bordered">
+
+  <tbody>
+      <tr> 
+        <th>Booked at</th>
+        <td><%= @booking.data_created_at %></td>
+      </tr>
+      <tr> 
+        <th>Flat</th>
+        <td><%= @booking.apartment.name %></td>
+      </tr>
+      <tr> 
+        <th>Arrival</th>
+        <td><%= @booking.arrival %></td>
+      </tr>
+      <tr> 
+        <th>Departure</th>
+        <td><%= @booking.departure %></td>
+      </tr>
+      <tr> 
+        <th>Adults</th>
+        <td><%= @booking.adults %></td>
+      </tr>
+      <tr> 
+        <th>Children</th>
+        <td><%= @booking.children %></td>
+      </tr>
+      <tr> 
+        <th>Platform</th>
+        <td><%= @booking.channel.name %></td>
+      </tr>
+      <tr> 
+        <th>Code</th>
+        <td><%= @booking.code %></td>
+      </tr>
+      <tr> 
+        <th>Telephone</th>
+        <td><%= @booking.phone %></td>
+      </tr>
+      <tr> 
+        <th>ID Status</th>
+        <td><%= @booking.id_status %></td>
+      </tr>
+      <tr> 
+        <th>Deposit Status</th>
+        <td>
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <%= @booking.deposit_status %> <%= @booking.requests&.deposit&.last&.capture? ? " (#{@booking.requests&.deposit&.last&.link})" : ''  %>
+            </div>
+            <div>
+              <% if @booking.active_deposit? %>
+              <button class="btn btn-sm btn-success" id="btn-capture" data-request-id="<%= @booking.requests.deposit.last.id %>">Capture</button>
+              <button class="btn btn-sm btn-primary" id="btn-release" >Release</button>
+              <% end %>
+            </div>
+          </div>
+          </td>
+      </tr>
+      <tr> 
+        <th>Terms Status</th>
+        <td><%= @booking.terms_status %></td>
+      </tr>
+      <tr> 
+        <th>Previous bookings</th>
+        <td><%= @booking.previous_bookings_count %></td>
+      </tr>
+  </tbody>
+
+</table>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+
+
+    const btnCapture = document.querySelector('#btn-capture')
+    if (btnCapture) {
+      document.querySelector('#btn-capture').addEventListener('click', function(e){
+
+        const requestId = e.target.getAttribute('data-request-id');
+
+        Swal.fire({
+          title: `How much would you like to capture?`,
+          input: 'text',
+          inputPlaceholder: 'e.g. 50',
+          showCancelButton: true
+        }).then((amount) => {
+        
+          if (amount.isConfirmed) {
+
+            if(amount.value > 150) {
+              Swal.fire("Too much!", "You can't capture more than the original payment amount.", "warning")
+              return
+            }
+
+            Swal.fire({
+              title: `Notes on why you're capturing this amount (£${amount.value})`,
+              input: 'textarea',
+              inputPlaceholder: 'Enter your notes here',
+              showCancelButton: true
+            }).then((notesResult) => {
+              if (notesResult.isConfirmed) {
+                const notes = notesResult.value;
+                
+                fetch('/requests/' + requestId + "/capture-deposit", {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                  },
+                  body: JSON.stringify({
+                    request_action: 'capture',
+                    booking_id: <%= @booking.id %>,
+                    amount: amount.value,
+                    notes: notes,
+                  })
+                }).then(response => {
+                  if (response.ok) {
+                    Swal.fire('Success', 'Your request has been submitted.', 'success');
+                  }
+                })
+
+              }
+            })
+          }
+        })
+      });
+    }
+
+    const btnRelease = document.querySelector('#btn-release')
+    if (btnRelease) {
+      document.querySelector('#btn-release').addEventListener('click', function(e){
+        Swal.fire({
+          title: "Are you sure?",
+          text: "This will release the full deposit amount (£150.00) to the customer and is irreversible.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, release it.",
+          cancelButtonText: "Cancel",
+          reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire({
+                title: `Notes on why you're releasing the deposit`,
+                input: 'textarea',
+                inputPlaceholder: 'Enter your notes here',
+                showCancelButton: true
+              }).then((notesResult) => {
+                if (notesResult.isConfirmed) {
+                  const notes = notesResult.value;
+                  
+                  fetch('/requests/' +  <%= Request.where(booking_id: @booking).deposit&.paid&.last&.id || '0' %> + "/release-deposit", {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                      request_action: 'release',
+                      booking_id: <%= @booking.id %>,
+                      notes: notes,
+                    })
+                  }).then(response => {
+                    if (response.ok) {
+                      Swal.fire('Success', 'Your request has been submitted.', 'success');
+                    }
+                  })
+                }
+            })
+          }
+        });
+      });
+    }
+
+
+  });
+</script>
+
+
+

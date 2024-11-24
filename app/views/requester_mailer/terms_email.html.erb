@@ -1,0 +1,46 @@
+<body class="bg-light">
+  <div class="container">
+    <img class="ax-center my-10 w-24" src="/logo.png" />
+    <div class="card p-6 p-lg-10 space-y-4">
+      <h1 class="h3 fw-700">
+        Please agree to the terms and conditions
+      </h1>
+
+      <p>You have been requested to agree to our terms and conditions for your booking with Casa Cosy.</p>
+      <p> Please use the link below. Booking details for reference:</p>
+
+      <table class="table table-striped table-bordered">
+        <tr>
+          <th>Booking Reference</th>
+          <td><%= @r.booking.reference_id %></td>
+        </tr>
+        <tr>
+          <th>Dates</th>
+          <td><%= @r.booking.arrival %> - <%= @r.booking.departure %></td>
+        </tr>
+        <tr>
+          <th>Platform</th>
+          <td><%= @r.booking.channel.name %></td>
+        </tr>
+        <tr>
+          <th>Flat Name</th>
+          <td><%= @r.booking.apartment.name %></td>
+        </tr>
+        <tr>
+          <th>Total</th>
+          <td>£<%= number_with_precision(@r.booking.price, precision: 2) %></td>
+        </tr>
+      </table>
+
+      <p>Please go through the terms and conditions and agree and sign it prior to your stay.</p>
+
+      <a class="btn btn-primary p-3 fw-700" href="/requests/<%= @r.id %>?r=<%= @r.booking.reservation_id %>">Read Terms</a>
+    </div>
+    <div class="text-muted text-center my-6">
+      Sent with <3 from Casa Cosy. <br>
+      53 Bradford Street<br>
+      Walsall, WS1 3QD <br>
+      support@casacosy.co.uk
+    </div>
+  </div>
+</body>

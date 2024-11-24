@@ -1,0 +1,26 @@
+<h3>Hey <%= current_user.name %>!</h3>
+
+
+<% if true %>
+<b>You have <span style='color:orange;font-size:20px;'>2</span> cleans today.</b>
+<div class="container mt-3">
+  <div class="row p-4">
+    <a href="/" class='mb-5'>
+      <div class="col p-5 bg-primary mx-1 text-center fs-1 text-white" style='position:relative;'>
+        Navy
+        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
+          <span>Not done</span>
+          <span class="visually-hidden">unread messages</span>
+        </span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<% else %>
+
+  <div class="alert alert-secondary mt-4">
+    You have no cleans today.
+  </div>
+
+<% end %>

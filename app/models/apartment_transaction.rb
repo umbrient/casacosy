@@ -1,0 +1,2 @@
+class ApartmentTransaction < ApplicationRecord
+end

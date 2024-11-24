@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SaPortal</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark" style='background:#34a38b;'>
+      <div class="container">
+        <a class="navbar-brand" href="#">Casa Cosy Internal Web App</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <% %w(transactions cleaning_predictor data cleaning deposits sync).each do |link|
+                klass = link.classify.constantize rescue link.singularize.to_sym
+                next unless can?(:read, klass)
+            %>
+            <a class="nav-item nav-link" href="/<%= link%>"><%= link.titleize %> </a>
+            <% end %>
+          </div>
+        </div>
+
+        <% if user_signed_in? %>
+          <%= button_to "Sign out (#{current_user.name})", destroy_user_session_path, method: :delete,  data: { turbo: false }, class: 'nav-link text-white' %>
+        <% else  %>
+        <%= link_to "Login", new_user_session_path, data: { turbo_method: :delete }  %>
+        <% end  %>
+
+
+
+      </div>
+    </nav>
+
+    <div class="container">
+        <% if notice %>
+          <p class="notice mt-4 alert alert-warning"><%= notice %></p>
+        <% end %>
+
+        <% if alert %>
+          <p class="alert mt-4 alert alert-danger"><%= alert %></p>  
+        <% end %>        
+    </div>
+   
+   <div class="container mt-5">
+      <%= yield %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  </body>
+</html>

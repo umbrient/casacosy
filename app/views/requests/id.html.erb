@@ -1,0 +1,79 @@
+<div class="row">
+  <div class="col">
+    <h3>Hey, <%= @request.booking.guest_name %>!</h3>
+    <hr>
+    <h5>Please upload your ID below</h5>
+    <div class="alert alert-info my-3">
+      Please upload a <b>valid</b> form of ID according to the list below. Your document will be stored securely and reviewed by a representative.
+    </div>
+
+    <p>Valid forms of ID include:</p>
+    <ul>
+      <li>Provisional/Full Driver's License</li>
+      <li>Passport</li>
+      <li>Biometric Residence Card</li>
+      <li>National Identity Card</li>
+      <li>Travel Document</li>
+      <li>Birth Certificate of Certificate of Registry of Birth</li>
+    </ul>
+
+    <b>Please upload file below:</b>
+    <div class="card p-4 bg-light">
+      <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data">
+          <input type="file" name="file" id="file">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col text-end">
+    <button id="btn-upload" class="btn btn-lg btn-primary my-3">Next <i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+
+<script>
+document.querySelector("#btn-upload").addEventListener("click", async function () { 
+  const fileInput = document.querySelector("#file");
+  const feedback = (title, message, type) => Swal.fire(title, message, type);
+
+  if (!fileInput.value) {
+    feedback("Please upload a valid form of identification.", "error");
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  // Validate the file type
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    feedback('Oops!', "Only image files (JPEG, PNG, GIF, WebP) are allowed.", "error");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch("/requests/<%= @request.id %>/upload-id", {
+      method: "POST",
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token here
+      },
+      body: formData, // FormData automatically handles multipart/form-data
+    });
+
+    if (response.ok) {
+      location.reload();
+    } else {
+      const errorText = await response.text();
+      feedback('Oops!', `Failed to upload your ID. ${errorText}, please contact your administrator.`, "error");
+    }
+  } catch (error) {
+    feedback('Oops!', `An unexpected error occurred: ${error.message}, please contact your administrator.`, "error");
+  }
+});
+
+</script>

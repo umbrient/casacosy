@@ -1,0 +1,164 @@
+<div class="container">
+
+  
+  <div class="row">
+    <div class="col">
+      <div class="d-flex align-items-center">
+          <h3 class="mb-3 me-3">Cleans Determiner</h3>
+          <h5>(<%= "#{@today.to_date} - #{@todays_day}" %>)</h5>
+      </div>
+    </div>
+    <div class="col text-end">
+      <%= link_to '-1 Day <i class="bi bi-caret-left"></i>'.html_safe, "/?date=#{@yesterday}", method: :get, class: 'btn btn-secondary' %>
+      <%= link_to 'Today', root_path, method: :get, class: 'btn btn-primary' %>
+      <%= link_to '<i class="bi bi-caret-right"></i> +1 Day'.html_safe, "/?date=#{@tomorrow}", method: :get, class: 'btn btn-secondary' %>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <% @apartments.each do |a| %>
+
+      <% current_booking = a&.bookings&.current_bookings(@today).first %>
+      <% previous_booking = a&.bookings&.current_bookings(@yesterday).first %>
+
+      <div class="col py-3 d-flex justify-content-center">
+        <div class="card" style="width: 18rem;">
+          <div class="card-header">
+              <h5 class="card-title"><%= a.name %></h5>
+            </div>
+          <div class="card-body">
+            <%= (a.bookings.departing(@today).any? ? t("cleaning_predictor.today.clean", weekday: @todays_day) : t("cleaning_predictor.today.no_clean", weekday: @todays_day)).html_safe %>
+            <hr>
+            <p class="card-text"><%= (a.bookings.departing(@tomorrow).any? ? t("cleaning_predictor.tomorrow.clean", weekday: @tomorrows_day) : t("cleaning_predictor.tomorrow.no_clean", weekday: @tomorrows_day)).html_safe %> </p>
+            <hr>
+            <b> Guests (<i class='bi bi-person'></i>x <%= current_booking&.guest_count || 0 %>)</b>
+        
+            <% if current_booking %>
+              <table class="table table-sm table-bordered mt-2">
+                <tr>
+                  <th>Name</th>
+                  <td><%= current_booking.guest_name %></td>
+                </tr>
+
+                <tr>
+                  <th>Number</th>
+                  <td><%= current_booking.phone %></td>
+                </tr>
+
+                <tr>
+                  <th>Platform</th>
+                  <td><%= current_booking.channel.name %></td>
+                </tr>
+
+                <tr>
+                  <th>Booked</th>
+                  <td><%= distance_of_time_in_words(@today, current_booking.data_created_at) %> ago </td>
+                </tr>  
+
+                <tr>
+                  <th>Arrival</th>
+                  <td><%= current_booking.arrival %> </td>
+                </tr>    
+
+                <tr>
+                  <th>Duration</th>
+                  <td><%= distance_of_time_in_words(current_booking.arrival, current_booking.departure) %> </td>
+                </tr>    
+
+                <tr>
+                  <th>Departure</th>
+                  <td><%=  current_booking.departure %> </td>
+                </tr>    
+
+                <tr>
+                  <th>New Code</th>
+                  <td><%= current_booking&.code || '@ 11AM'  %></td>
+                </tr>    
+
+
+              </table>
+              <% else  %>
+                <div class='alert alert-light m-1'>No one's here.</div>
+              <% end %>
+          </div>
+
+          <div class="card-footer">
+            <div class="d-flex justify-content-between">
+              <div>Previous code was <b> <%= previous_booking&.code || 'N/A' %></b></div>
+              <div><a data-apartment_id="<%= a&.id %>" class='link-underline-primary more-codes' style='cursor: pointer;'>more...</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <% end %>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+    document.querySelectorAll(".more-codes").forEach(function(elem) {
+      elem.addEventListener('click', function(el) {
+        // Show the SweetAlert loading message
+        Swal.fire({
+          title: 'Loading',
+          html: 'Please wait while we load the data...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          
+            var apartmentId = el.target.getAttribute("data-apartment_id");
+            fetch('/apartments/previous-codes?apartment_id=' + apartmentId , {
+              method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+              // Construct the HTML table
+              let table = `<table class="table">
+                            <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Platform</th>
+                                <th>Code</th>
+                              </tr>
+                            </thead>
+                            <tbody>`;
+
+              // Loop through the array and add rows to the table
+              data.forEach(item => {
+                table += `<tr>
+                            <td>${item.date}</td>
+                            <td>${item.platform}</td>
+                            <td>${item.code}</td>
+                          </tr>`;
+              });
+
+              table += `</tbody></table>`;
+
+              // Update the Swal modal to display the table
+              Swal.fire({
+                title: 'Previous Bookings',
+                html: table, // Insert the table into the Swal body
+                width: '600px', // Set the modal width as needed
+                showConfirmButton: true, // Show the OK button to close the modal
+              });
+              })
+              .catch(error => {
+                // Handle errors and show an error message
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Failed to load data. Please try again later.',
+                });
+              });
+            }
+          });
+
+      })
+    })
+
+  })
+</script>

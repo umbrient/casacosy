@@ -1,0 +1,4 @@
+web: env RUBY_DEBUG_OPEN=true bin/rails server -p 3000
+css: yarn watch:css
+js: yarn build --watch
+release: bundle exec rails db:migrate && bundle exec rails data:migrate

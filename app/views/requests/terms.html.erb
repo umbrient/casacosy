@@ -1,0 +1,74 @@
+<div class="row">
+  <div class="col">
+    <h3>Hey, <%= @request.booking.guest_name %>!</h3>
+    <hr>
+
+    <div class="alert alert-info">
+    Please review and agree to the terms and conditions below found <a target="_blank" href="/terms.pdf">here</a>.
+    </div>
+
+    <div class="d-flex justify-content-center text-center">
+        <div class="">
+          <h3>Please sign below to agree</h3>
+          <p>Please match it as closely to your ID document's signature as possible.</p>
+          <canvas class="bg-light" style='width:100%;'></canvas>
+        </div>
+    </div>  
+  </div>
+</div>
+
+<div class="row">
+  <div class="col d-flex justify-content-between">
+    <button class="btn btn-secondary" id="btn-clear" >Clear</button>
+    <button class="btn btn-primary" id="btn-submit" >Next <i class="bi bi-caret-right"> </i></button>
+  </div>
+</div>
+
+<script>
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.querySelector("canvas");
+    const signaturePad = new SignaturePad(canvas);
+    
+
+    document.querySelector("#btn-clear").addEventListener('click', function(e){
+      if(signaturePad) {
+        signaturePad.clear();
+      }
+    }); 
+
+    document.querySelector("#btn-submit").addEventListener('click', function(e){
+      
+      Swal.fire({
+          title: "Submit signature?",
+          text: "By submitting this signature, you agree to comply with the terms and conditions outlined in the above document.",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, I agree",
+          cancelButtonText: "Cancel",
+          reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+              if(signaturePad) {
+                let img = signaturePad.toDataURL();
+
+                fetch("/requests/<%= @request.id %>/agree-to-terms", {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                      booking_id: <%= @booking.id %>,
+                      file: img
+                    })
+                  }).then(response => {
+                    if (response.ok)  location.reload();
+                  })
+
+              }
+            }
+        });
+    }); 
+  })
+</script>
