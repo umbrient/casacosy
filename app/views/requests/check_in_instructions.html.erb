@@ -1,0 +1,111 @@
+<h3 class='text-center py-2'>Welcome, <%= @booking.guest_name %>!</h3>
+<p>These are your check-in instructions for your booking:</p>
+
+<table class='table table-sm table-striped table-bordered'>
+  <thead>
+    <tr><th>Booking Reference</th><td><%= @booking.reservation_id %></td></tr>
+    <tr><th>Guest count</th><td><%= @booking.guest_count %></td></tr>
+    <tr><th>Property Name</th><td><%= @booking.apartment.name %></td></tr>
+    <tr><th>Check-in time</th><td><%= @booking.check_in_time.strftime("%H:%M") %></td></tr>
+    <tr><th>Check-out time</th><td><%= @booking.check_out_time.strftime("%H:%M") %></td></tr>
+  </thead>
+</table>
+
+<div class="py-2 d-flex justify-content-center text-success">
+  <hr style="width:30%">
+</div>
+
+15% off?
+
+<div class="py-2 d-flex justify-content-center text-success">
+  <hr style="width:30%">
+</div>
+
+
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="pills-checkin-tab" data-bs-toggle="pill" data-bs-target="#pills-checkin" type="button" role="tab" aria-controls="pills-checkin" aria-selected="true">Check-In</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="pills-checkout-tab" data-bs-toggle="pill" data-bs-target="#pills-checkout" type="button" role="tab" aria-controls="pills-checkout" aria-selected="false">Check-Out</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="pills-amenities-tab" data-bs-toggle="pill" data-bs-target="#pills-amenities" type="button" role="tab" aria-controls="pills-amenities" aria-selected="false">Amenities</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Help</button>
+  </li>
+</ul>
+<div class="tab-content bordered" id="pills-tabContent">
+  <div class="tab-pane fade show active" id="pills-checkin" role="tabpanel" aria-labelledby="pills-checkin-tab" tabindex="0">
+    <h5 class='my-3'>How to check-in</h5>
+
+  <div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        1. Summarised itinerary
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        2. The keys
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        3. The property
+      </button>
+    </h2>
+    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+
+    <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        4. Parking
+      </button>
+    </h2>
+    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  <div class="tab-pane fade" id="pills-checkout" role="tabpanel" aria-labelledby="pills-checkout-tab" tabindex="0">
+    <h5 class='my-3'>Check-out</h5>
+  </div>
+  <div class="tab-pane fade" id="pills-amenities" role="tabpanel" aria-labelledby="pills-amenities-tab" tabindex="0">
+
+    <h5 class='my-3'>Amenities</h5>
+    <table class='table table-sm table-striped table-bordered'>
+      <thead>
+        <tr><th>Wi-Fi Password</th><td><%= @booking.reservation_id %></td></tr>
+        <tr><th>Netflix Details</th><td><p class='text-danger'>You did not purchase this feature</p></td></tr>
+      </thead>
+    </table>
+
+  </div>
+  <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">...</div>
+</div>
+

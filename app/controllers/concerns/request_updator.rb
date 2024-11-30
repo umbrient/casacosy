@@ -21,7 +21,9 @@ class RequestUpdator
     request_type = request.request_type.pluralize
     date = Date.today.strftime("%Y/%B/%d")
     ext = File.extname(@params[:file].original_filename)
-    file_name = request.booking.guest_name || SecureRandom.alphanumeric(7).downcase
+    
+    file_name = (request.booking.guest_name || SecureRandom.alphanumeric(7).downcase)
+    file_name += Time.now.strftime("%H%M%S").to_s
       
     path = "SAs/#{request_type}/#{date}/#{request.booking.apartment.name}/#{file_name}#{ext}"
 
@@ -36,7 +38,7 @@ class RequestUpdator
           request_type: request.request_type, 
           request_action: 'Uploaded',
           notes: obj.key,
-          user: nil
+          user_id: 0
         });
 
         r.update(link: "/requests/#{r.id}/preview-id")
@@ -57,17 +59,23 @@ class RequestUpdator
 
     request = Request.not_expired.request.find_by(id: @params[:id])
     return unless request
-
+    
     unless request.paid?
 
-      status = stripe_api.deposit_successful?(@params[:paymentId]) ? 'Paid' : 'Error'
+      # paid with stripe?
+      payment_id = @params[:paymentId]
+      
+      # paid with third party?
+      payment_id = @params[:payment_intent] if payment_id.nil?
+       
+      status = stripe_api.deposit_successful?(payment_id) ? 'Paid' : 'Error'
       
       Request.create({
         booking_id: request.booking.id,
         request_type: request.request_type, 
         request_action: status,
-        link: "https://dashboard.stripe.com/payments/#{@params[:paymentId]}",
-        notes: @params[:paymentId],
+        link: "https://dashboard.stripe.com/payments/#{payment_id}",
+        notes: payment_id,
         user: nil
       });
         

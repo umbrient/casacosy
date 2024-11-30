@@ -16,12 +16,14 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark" style='background:#34a38b; height:100px'>
       <div class="container d-flex justify-content-center">
-        <a class="navbar-brand text-center" href="#"><span>Casa Cosy<br><small>Pre Check-in Form</p></a>
+        <a class="navbar-brand text-center" href="#"><span>Casa Cosy<br><small><%= @step.nil? ? "Check-in instructions" : "Pre Check-in Form" %></p></a>
       </div>
     </nav>
 
     <div class="bg-light">
-      <div class="container text-center py-3"><b>Step (<%= @step %>/4) - <%= @step_text %></b></div>
+      <% unless @step.nil? %>
+      <div class="container text-center py-3"><b>Step (<%= @step %>/5) - <%= @step_text %></b></div>
+      <% end %>
     </div>
    
     <div class="container mt-3">

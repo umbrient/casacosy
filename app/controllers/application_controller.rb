@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
-  check_authorization unless: :devise_controller?
-  before_action :authenticate_user!
+  check_authorization unless: :no_login_required?
+  before_action :authenticate_user!, except: [:no_login_required?]
   
   rescue_from CanCan::AccessDenied do |exception|
     render plain: "This page does not exist."
@@ -16,6 +16,10 @@ class ApplicationController < ActionController::Base
 
   def sync_transactions 
     starling_api.get_transactions
+  end
+
+  def no_login_required?
+    devise_controller? || controller_path == "smoobu_listener"
   end
 
   def sync 

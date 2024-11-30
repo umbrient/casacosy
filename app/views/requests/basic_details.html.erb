@@ -1,0 +1,106 @@
+<div class="row">
+  <div class="col">
+    <h3>Hey, <%= @request.booking.guest_name %>!</h3>
+    <hr>
+    <h5>Please provide some basic details for you booking</h5>  
+  </div>
+</div>
+
+    <div class="row mt-4  ">
+      <%= simple_form_for @booking, url: bookings_path, method: :post do |f| %>
+      <div class="col">
+        <%= f.input :guest_input_firstname, label: "First Name", required: true, placeholder: 'e.g Ronald' %>
+        <%= f.input :guest_input_lastname, label: "Last Name", required: true,  placeholder: 'e.g Blakeley' %>
+      </div>
+
+      <div class="col">
+        <%= f.input :guest_input_email, label: "Email", as: :email, required: true, placeholder: 'e.g. ron@blakeley.com' %>
+      </div>
+
+        <div class="col">
+        <%= f.input :guest_input_guestcount, label: "Guest count", as: :numeric, required: true, placeholder: 'e.g. 4' %>
+      </div>
+
+      <div class="col">
+        <%= f.input :guest_input_eta, 
+            label: "Estimated Time of Arrival", 
+            as: :select,
+            hint: 'If you wish to check-in earlier, please specify on Step 4 of this form. Leave as 15:00 if unknown.',
+            collection: (15..23).flat_map { |hour| [0, 30].map { |minute| format("%02d:%02d", hour, minute) } }, 
+            include_blank: "Select a time",
+            selected: @booking.eta || '15:00',
+            required: true %>
+      </div>
+
+        <% if @booking.guest_count > 4 %>
+          <%= f.input :guest_input_sofabed, label: "Do you need the sofa-bed made?", as: :boolean %>
+        <% end %>
+
+         <% if @booking.apartment.has_parking? %>
+          <%= f.input :guest_input_parking, label: "Do you need to use parking?", as: :boolean %>
+        <% end %>
+      <% end %>
+    </div>
+
+
+<div class="row">
+  <div class="col text-end">
+    <button id="btn-next" class="btn btn-lg btn-primary my-3">Next <i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+
+<script>
+document.querySelector("#btn-next").addEventListener("click", async function () { 
+  
+
+  var firstname = document.querySelector("#booking_guest_input_firstname").value
+  var lastname = document.querySelector("#booking_guest_input_lastname").value
+  var email = document.querySelector("#booking_guest_input_email").value
+  var guestcount = document.querySelector("#booking_guest_input_guestcount").value
+  var eta = document.querySelector("#booking_guest_input_eta").value
+  var sofabed = document.querySelector("#booking_guest_input_sofabed")?.value || false 
+  var parking = document.querySelector("#booking_guest_input_parking")?.value || false 
+  var reservation = '<%= @booking.reservation_id %>'
+
+  if(firstname.length == 0 || lastname.length == 0 || !isValidEmail(email) || eta == '' || guestcount == '') {
+    Swal.fire('Oops!', 'Please ensure all the required fields are filled in', 'error');
+    return;
+  }
+
+  payload = {
+    guest_input_firstname: firstname,
+    guest_input_lastname: lastname,
+    guest_input_email: email,
+    guest_input_guestcount: guestcount,
+    guest_input_eta: eta,
+    guest_input_sofabed: sofabed,
+    guest_input_parking: parking,
+    reservation: reservation
+  }
+
+  try {
+    const response = await fetch("/bookings/<%= @booking.id %>", {
+      method: "PATCH",
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token here
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      window.location.href = window.location.href.split("&")[0]
+    } else {
+      const errorText = await response.text();
+      Swal.fire('Oops', 'An unknown error has occurred. Please contact your administrator.', 'error')
+    }
+  } catch (error) {
+  }
+});
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+</script>

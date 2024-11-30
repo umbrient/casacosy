@@ -6,7 +6,6 @@ class SmoobuApi < Api
   def initialize; end
 
   def get_all_past_reservations 
-    
     bookings = []
     
     page = 1
@@ -34,60 +33,18 @@ class SmoobuApi < Api
 
         if Booking.find_by(reference_id: booking['reference-id']) 
           existing = Booking.find_by(reference_id: booking['reference-id']) 
-          if booking['type'] != existing.booking_type 
-            existing.update(booking_type: booking['type'])
+          if something_different?(booking, existing)
+            Rails.logger.info "Something has changed with reservation ID #{existing.reservation_id}"
+            existing.update(booking_object(booking))
           end 
           next
         end
 
-        payment_charge = 0 
-        
-        if booking['channel']['name'] == 'Booking.com'
-          payment_charge = ((0.0130 * booking['price'].to_f))
-        end 
-
-        new_bookings << {
-          reference_id: booking['reference-id'],
-          booking_type: booking['type'],
-          arrival: booking['arrival'],
-          departure: booking['departure'],
-          data_created_at: booking['created-at'],
-          data_modified_at: booking['modifiedAt'],
-          apartment_id: Apartment.find(booking['apartment']['id']).id,
-          channel_id: Channel.find(booking['channel']['id']).id,
-          guest_name: booking['guest-name'],
-          firstname: booking['firstname'],
-          lastname: booking['lastname'],
-          email: booking['email'],
-          phone: booking['phone'],
-          adults: booking['adults'],
-          children: booking['children'],
-          check_in: booking['check-in'],
-          check_out: booking['check-out'],
-          notice: booking['notice'],
-          assistant_notice: booking['assistant-notice'],
-          price: booking['price'],
-          price_details: booking['price-details'],
-          city_tax: booking['city-tax'],
-          price_paid: booking['price-paid'],
-          commission_included: booking['commission-included'],
-          payment_charge: payment_charge,
-          prepayment: booking['prepayment'],
-          prepayment_paid: booking['prepayment-paid'],
-          deposit: booking['deposit'],
-          deposit_paid: booking['deposit-paid'],
-          language: booking['language'],
-          guest_app_url: booking['guest-app-url'],
-          is_blocked_booking: booking['is-blocked-booking'],
-          guest_id: booking['guestId']
-      }
-
-
+        new_bookings << booking_object(booking)
       end
     end
 
     Booking.create(new_bookings)
-   
     
   end
 
@@ -100,6 +57,62 @@ class SmoobuApi < Api
 
     def api_key 
       @api_key ||= (Rails.application.credentials.dig(:smoobu, :api_key) || ENV['SMOOBU_API_KEY'])
-
     end
+
+    def booking_object(obj) 
+
+      payment_charge = 0 
+        
+      if obj['channel']['name'] == 'Booking.com'
+        payment_charge = ((0.0130 * obj['price'].to_f))
+      end 
+
+      {
+        reference_id: obj['reference-id'],
+        booking_type: obj['type'],
+        arrival: obj['arrival'],
+        departure: obj['departure'],
+        data_created_at: obj['created-at'],
+        data_modified_at: obj['modifiedAt'],
+        apartment_id: Apartment.find(obj['apartment']['id']).id,
+        channel_id: Channel.find(obj['channel']['id']).id,
+        guest_name: obj['guest-name'],
+        firstname: obj['firstname'],
+        lastname: obj['lastname'],
+        email: obj['email'],
+        phone: obj['phone'],
+        adults: obj['adults'],
+        children: obj['children'],
+        check_in: obj['check-in'],
+        check_out: obj['check-out'],
+        notice: obj['notice'],
+        assistant_notice: obj['assistant-notice'],
+        price: obj['price'],
+        price_details: obj['price-details'],
+        city_tax: obj['city-tax'],
+        price_paid: obj['price-paid'],
+        commission_included: obj['commission-included'],
+        payment_charge: payment_charge,
+        prepayment: obj['prepayment'],
+        prepayment_paid: obj['prepayment-paid'],
+        deposit: obj['deposit'],
+        deposit_paid: obj['deposit-paid'],
+        language: obj['language'],
+        guest_app_url: obj['guest-app-url'],
+        is_blocked_booking: obj['is-blocked-booking'],
+        guest_id: obj['guestId']
+      }
+    end 
+
+    def something_different?(booking, existing)  
+      [
+        booking['type'] == existing.booking_type,
+        booking['children'] == existing.children,
+        booking['adults'] == existing.adults,
+        booking['arrival'] == existing.arrival,
+        booking['departure'] == existing.departure,
+        booking['price'] == existing.price,
+    ].include? false
+    end
+
 end

@@ -10,17 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_17_133240) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_30_005022) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "addon_options", force: :cascade do |t|
+    t.bigint "addon_id"
+    t.string "name"
+    t.text "description"
+    t.decimal "price_pennies_each"
+    t.boolean "quantifiable", default: false
+    t.string "quantifiable_text"
+    t.boolean "booleanable", default: false
+    t.boolean "textable", default: false
+    t.integer "min", default: 1
+    t.integer "max", default: 10
+    t.integer "sort_order", default: 0
+    t.index ["addon_id"], name: "index_addon_options_on_addon_id"
+  end
 
   create_table "addons", force: :cascade do |t|
     t.string "name"
     t.text "description"
-    t.decimal "price_pennies"
-    t.string "type"
-    t.integer "min"
-    t.integer "max"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -53,13 +64,25 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_17_133240) do
     t.datetime "updated_at", null: false
     t.string "colour", default: "primary"
     t.integer "sort_order", default: 0
+    t.boolean "has_parking", default: false
+  end
+
+  create_table "booking_addon_options", force: :cascade do |t|
+    t.bigint "booking_id"
+    t.bigint "addon_option_id"
+    t.integer "quantity"
+    t.boolean "yes_or_no"
+    t.text "text_value"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["addon_option_id"], name: "index_booking_addon_options_on_addon_option_id"
+    t.index ["booking_id"], name: "index_booking_addon_options_on_booking_id"
   end
 
   create_table "booking_addons", force: :cascade do |t|
     t.bigint "booking_id"
     t.bigint "addon_id"
-    t.integer "quantity"
-    t.decimal "amount_paid_pennies"
     t.text "details"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -103,9 +126,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_17_133240) do
     t.integer "guest_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "estimated_time"
-    t.boolean "sofa_bed_setup", default: false
-    t.string "code"
+    t.string "guest_input_firstname"
+    t.string "guest_input_lastname"
+    t.integer "guest_input_guestcount"
+    t.string "guest_input_email"
+    t.datetime "guest_input_eta"
+    t.boolean "guest_input_sofabed", default: false
+    t.boolean "guest_input_parking", default: false
+    t.time "check_in_time", default: "2000-01-01 15:00:00"
+    t.time "check_out_time", default: "2000-01-01 10:00:00"
+    t.boolean "guest_has_viewed_extras", default: false
     t.index ["apartment_id"], name: "index_bookings_on_apartment_id"
     t.index ["channel_id"], name: "index_bookings_on_channel_id"
     t.index ["guest_id"], name: "index_bookings_on_guest_id"

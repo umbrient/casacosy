@@ -10,7 +10,10 @@
     <div class="d-flex justify-content-center text-center">
         <div class="">
           <h3>Please sign below to agree</h3>
-          <p>Please match it as closely to your ID document's signature as possible.</p>
+          <p>Please match the signature as closely as possible to the one on your uploaded ID document.</p>
+          <div class="alert alert-warning">
+            Note: You can only do this action <b>once</b>.
+          </div>
           <canvas class="bg-light" style='width:100%;'></canvas>
         </div>
     </div>  
@@ -19,8 +22,9 @@
 
 <div class="row">
   <div class="col d-flex justify-content-between">
+    <button class="btn btn-light" id="btn-back" ><i class="bi bi-caret-left"> </i> Back</button>
     <button class="btn btn-secondary" id="btn-clear" >Clear</button>
-    <button class="btn btn-primary" id="btn-submit" >Next <i class="bi bi-caret-right"> </i></button>
+    <button class="btn btn-primary" id="btn-next" >Next <i class="bi bi-caret-right"> </i></button>
   </div>
 </div>
 
@@ -30,6 +34,9 @@
     const canvas = document.querySelector("canvas");
     const signaturePad = new SignaturePad(canvas);
     
+    document.querySelector("#btn-back").addEventListener('click', function(e){
+      window.location = window.location.href.split("&")[0] + "&step=2"
+    }); 
 
     document.querySelector("#btn-clear").addEventListener('click', function(e){
       if(signaturePad) {
@@ -37,7 +44,7 @@
       }
     }); 
 
-    document.querySelector("#btn-submit").addEventListener('click', function(e){
+    document.querySelector("#btn-next").addEventListener('click', function(e){
       
       Swal.fire({
           title: "Submit signature?",

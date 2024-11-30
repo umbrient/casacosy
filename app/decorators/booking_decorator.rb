@@ -40,7 +40,7 @@ class BookingDecorator < Draper::Decorator
       'not_requested': 'text-bg-secondary',
       'request': 'text-bg-warning',
       'viewed': 'text-bg-secondary',
-      'signed': 'text-bg-secondary',
+      'signed': 'text-bg-primary',
       'uploaded': 'text-bg-primary',
       'paid': 'text-bg-primary',
       'approve': 'text-bg-success',

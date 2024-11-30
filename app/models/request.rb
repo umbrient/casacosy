@@ -29,7 +29,7 @@ class Request < ApplicationRecord
   belongs_to :user, optional: true
 
   def username
-    if user_id.nil?
+    if user_id == 0
       'Guest'
     elsif(user_id > 0)
        user.name

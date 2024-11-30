@@ -29,18 +29,19 @@
 </div>
 
 <div class="row">
-  <div class="col text-end">
-    <button id="btn-upload" class="btn btn-lg btn-primary my-3">Next <i class="bi bi-chevron-right"></i></button>
+  <div class="col d-flex justify-content-between">
+    <button id="btn-back" class="btn btn-lg btn-light my-3"><i class="bi bi-chevron-left"></i> Back</button>
+    <button id="btn-next" class="btn btn-lg btn-primary my-3">Next <i class="bi bi-chevron-right"></i></button>
   </div>
 </div>
 
 <script>
-document.querySelector("#btn-upload").addEventListener("click", async function () { 
+document.querySelector("#btn-next").addEventListener("click", async function () { 
   const fileInput = document.querySelector("#file");
   const feedback = (title, message, type) => Swal.fire(title, message, type);
 
   if (!fileInput.value) {
-    feedback("Please upload a valid form of identification.", "error");
+    feedback('Oops!', "Please upload a valid form of identification.", "error");
     return;
   }
 
@@ -74,6 +75,12 @@ document.querySelector("#btn-upload").addEventListener("click", async function (
   } catch (error) {
     feedback('Oops!', `An unexpected error occurred: ${error.message}, please contact your administrator.`, "error");
   }
+});
+
+document.querySelector("#btn-back").addEventListener("click", function(){
+
+  window.location = window.location.href + "&step=1";
+
 });
 
 </script>

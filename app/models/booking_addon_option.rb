@@ -1,0 +1,2 @@
+class BookingAddonOption < ApplicationRecord
+end

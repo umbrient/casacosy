@@ -32,6 +32,21 @@ class Booking < ApplicationRecord
     (adults.to_i + children.to_i)
   end
 
+  def eta
+    guest_input_eta&.strftime("%H:%M")
+  end
+
+  def basic_details_given?
+    given = true
+    cols = Booking.column_names.select { |c| c.include? 'guest_input_' }
+    
+    cols.each do |c| 
+      given = false if self.send(c).nil?
+    end
+
+    given
+  end
+
   def awaiting_id? 
     requests.id.last.request_action.requested?
   end 
@@ -44,7 +59,7 @@ class Booking < ApplicationRecord
     requests.terms.last.request_action.requested?
   end
 
-  def questions_answered?
+  def extras_answered?
     false 
   end
 
