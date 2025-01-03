@@ -45,7 +45,7 @@ end
   private 
 
   def api_key 
-    @api_key ||= (Rails.application.credentials.dig(:stripe, :test, :secret_key) || ENV['STRIPE_API_KEY'])
+    @api_key ||= (Rails.application.credentials.dig(:stripe, :live, :secret_key) || ENV['STRIPE_API_KEY'])
   end
 
 end
