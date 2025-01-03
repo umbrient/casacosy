@@ -153,7 +153,9 @@ class GuestsController < ActionController::Base
       @booking.update(guest_has_viewed_extras: true)
       @step_text = 'Any Extras?'
       @step = 4
-      @extras = @booking.apartment.addons
+      @extras = @booking.apartment.addons.joins(:apartment_addons)
+      .where(apartment_addons: { available: true }).distinct
+
       @selected_extras = @booking.booking_addon_options.unpaid.map do |bao|
         {
           addon_option_id: bao.addon_option_id,
