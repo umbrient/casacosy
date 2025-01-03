@@ -1,5 +1,5 @@
 class DepositsController < ApplicationController
-  load_and_authorize_resource
+  load_and_authorize_resource class: false
 
   def index
     @upcoming_bookings = Booking.next_48h_checkins.decorate

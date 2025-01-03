@@ -21,7 +21,7 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
             <% %w(transactions cleaning_predictor data cleaning deposits linen_counter).each do |link|
-                klass = link.classify.constantize rescue link.singularize.to_sym
+                klass = link.to_sym
                 next unless can?(:read, klass)
             %>
             <a class="nav-item nav-link" href="/<%= link%>"><%= link.titleize %> </a>
