@@ -28,6 +28,10 @@ Rails.application.routes.draw do
 
   # post '/webhook', to: 'smoobu_listener#webhook'
   
+  get '/linen_count', to: 'linen_counter#index'
+
+
+  
   get '/guests/:reservation_id/', to: 'guests#no_code'
 
   scope '/guests/:reservation_id/:code(/:step)' do  

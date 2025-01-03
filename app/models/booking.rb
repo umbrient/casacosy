@@ -24,6 +24,7 @@ class Booking < ApplicationRecord
   scope :next_48h_checkins, -> { not_cancelled.where("arrival >= ? AND arrival < ?", Date.today, Date.tomorrow + 2).order(departure: :asc) }
   scope :next_24h_checkins, -> { not_cancelled.where("arrival >= ? AND arrival < ?", Date.today, Date.tomorrow + 1).order(departure: :asc) }
   scope :bookings_after_date, -> (date) { last_20.not_cancelled.where("departure > ?", date).order(departure: :asc).limit(1) }
+  scope :between_dates, ->(from, to) { not_cancelled.where("arrival >= ? AND arrival <= ?", from, to).order(departure: :asc) } 
   
   belongs_to :channel
   belongs_to :apartment

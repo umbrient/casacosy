@@ -14,6 +14,7 @@ class Ability
     if user.is_manager? 
       # can :read, Transaction
       can :read, :cleaning_predictor
+      can :read, :linen_counter
       
       can :index, :deposit
       can :read, :deposits

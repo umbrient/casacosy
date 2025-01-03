@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_27_185836) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_03_111540) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,6 +66,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_27_185836) do
     t.integer "sort_order", default: 0
     t.boolean "has_parking", default: false
     t.integer "lockbox_pin"
+    t.integer "beds"
+    t.integer "sofabeds"
   end
 
   create_table "booking_addon_options", force: :cascade do |t|

@@ -1,21 +1,27 @@
 <div class="container  bg-light p-5">
-
-  <div class="row">
-    <div class="col">
-      <h2 class="mb-3">Linen Counter</h2>
-      <div class="row">
-        <div class="col">
-          <input type="text" class="form-control" placeholder="From...">
+  
+  <form action="/linen_count">
+    <div class="row">
+      <div class="col">
+        <h2 class="mb-3">Linen Counter</h2>
+        <div class="row">
+          <div class="col">
+            <input type="date" name="from" id="from" class="form-control" placeholder="From...">
+          </div>
+          <div class="col">
+            <input type="date" name="to" id="to" class="form-control" placeholder="To...">
+          </div>
         </div>
+      
+      <div class="row mt-2">
         <div class="col">
-          <input type="text" class="form-control" placeholder="To...">
-        </div>
-        <div class="col">
-          <button class="btn btn-secondary">Submit</button>
+          <button class="btn btn-primary" type="submit">Calculate</button>
         </div>
       </div>
     </div>
-  </div>
+  </form>
+
+</div>
 
   
   <div class="row">
@@ -25,11 +31,28 @@
       <thead>
         <tr>
           <th>Flat name</th>
-          <th>Bookings during period</th>
-          <th># of Beds</th>
-          <th>Total guests</th>
+          <th># of beds</th>
+          <th># of sofa-beds</th>
+          <th># of booking during period</th>
+          <th>Total guests during periods</th>
         </tr>
       </thead>
+
+      <tbody>
+
+        <% @data.each do |d| %>
+
+            <tr>
+              <td><%= d[:apartment].name %></td>
+              <td><%= d[:apartment].beds %></td>
+              <td><%= d[:apartment].sofabeds %></td>
+              <td><%= d[:bookings] %></td>
+              <td><%= d[:guests] %></td>
+            </tr>
+
+        <% end %>
+
+      </tbody>
 
     </table>  
   
