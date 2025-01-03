@@ -90,7 +90,7 @@ class GuestsController < ActionController::Base
     any_requests = @booking.requests.any? 
 
     unless any_requests
-      SendRequestEmailsJob.perform_one(@booking)
+      SendRequestEmailsJob.new.perform_one(@booking)
     end
 
     @request = @booking.requests.request.first

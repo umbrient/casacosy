@@ -14,7 +14,7 @@ class SendRequestEmailsJob < ApplicationJob
     end
   end
 
-  def self.perform_one(b)
+  def perform_one(b)
     id = b.id 
     ref = b.reference_id
     apartment = b.apartment.name 
