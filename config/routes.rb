@@ -26,7 +26,7 @@ Rails.application.routes.draw do
     end
   end
 
-  get '/webhook', to: 'smoobu_listener#webhook'
+  post '/webhook', to: 'smoobu_listener#webhook'
   
   get '/guests/:reservation_id/', to: 'guests#no_code'
 
