@@ -35,7 +35,7 @@
     const signaturePad = new SignaturePad(canvas);
     
     document.querySelector("#btn-back").addEventListener('click', function(e){
-      window.location = window.location.href.split("&")[0] + "&step=2"
+      goToStep('id')
     }); 
 
     document.querySelector("#btn-clear").addEventListener('click', function(e){
@@ -57,9 +57,10 @@
         }).then((result) => {
             if (result.isConfirmed) {
               if(signaturePad) {
+                Swal.showLoading();
                 let img = signaturePad.toDataURL();
 
-                fetch("/requests/<%= @request.id %>/agree-to-terms", {
+                fetch(url + "agree-to-terms", {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
@@ -70,7 +71,12 @@
                       file: img
                     })
                   }).then(response => {
-                    if (response.ok)  location.reload();
+                    Swal.hideLoading();
+                    if (response.ok) {
+                      refreshWithoutSteps();
+                    } else {
+                      Swal.fire("Oops", "An unknown error has occurred. Please contact your administrator.", "error")
+                    }
                   })
 
               }

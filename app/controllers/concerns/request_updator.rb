@@ -14,8 +14,15 @@ class RequestUpdator
 
   private 
 
-  def upload_id 
-    request = Request.not_expired.request.find_by(id: @params[:id])
+  def upload_id
+    reservation_id = @params[:reservation_id]
+    code = @params[:code].to_i
+    booking = Booking.find_by_reservation_id(reservation_id)
+
+    return unless booking 
+    return unless booking.auth_code == code
+    
+    request = booking.requests.request&.not_expired&.id&.first
     return unless request 
       
     request_type = request.request_type.pluralize
@@ -57,8 +64,15 @@ class RequestUpdator
 
   def pay_deposit 
 
-    request = Request.not_expired.request.find_by(id: @params[:id])
-    return unless request
+    reservation_id = @params[:reservation_id]
+    code = @params[:code].to_i
+    booking = Booking.find_by_reservation_id(reservation_id)
+
+    return unless booking 
+    return unless booking.auth_code == code
+
+    request = booking.requests.request&.not_expired&.deposit&.first
+    return unless request 
     
     unless request.paid?
 
@@ -88,12 +102,60 @@ class RequestUpdator
       
   end
 
+  def pay_extras
+    reservation_id = @params[:reservation_id]
+    code = @params[:code].to_i
+    booking = Booking.find_by_reservation_id(reservation_id)
+    
+    # paid with stripe?
+    payment_id = @params[:paymentId]
+      
+    # paid with third party?
+    payment_id = @params[:payment_intent] if payment_id.nil?
+
+    return unless payment_id
+    return unless booking 
+    return unless booking.auth_code == code
+    
+    total_payable = (booking.booking_addon_options.sum(:current_price_pennies)).to_i
+    
+    payment = stripe_api.retrieve_payment(payment_id)
+
+    if payment.amount_received == total_payable
+      # paid all items 
+      booking.booking_addon_options.update(paid: true)
+
+      # update early check-in 
+      if booking.booking_addon_options.joins(:addon).where(addon: { name: 'Early Check-In' }).any?
+        time = booking.booking_addon_options.joins(:addon).where(addon: { name: 'Early Check-In' }).first.addon_option.name[0...5]
+        booking.update(check_in_time: time)
+      end
+      
+      # update late check-outs? 
+      if booking.booking_addon_options.joins(:addon).where(addon: { name: 'Late Check-Out' }).any? 
+        time = booking.booking_addon_options.joins(:addon).where(addon: { name: 'Late Check-Out' }).first.addon_option.name[0...5]
+        booking.update(check_out_time: time)
+      end
+
+      return true 
+    else 
+      return false
+    end
+  end
+
   def agree_to_terms
 
-    request = Request.not_expired.request.find_by(id: @params[:id])
+    reservation_id = @params[:reservation_id]
+    code = @params[:code].to_i
+    booking = Booking.find_by_reservation_id(reservation_id)
+
+    return unless booking 
+    return unless booking.auth_code == code
+
+    request = booking.requests.request&.not_expired&.terms&.first
     return unless request 
 
-    output_path = Rails.root.join("tmp", "#{request.booking.reservation_id}.pdf")
+    output_path = Rails.root.join("tmp", "#{reservation_id}.pdf")
 
     add_signature_to_pdf(@params[:file], output_path)
 
@@ -117,7 +179,7 @@ class RequestUpdator
           user: nil
         });
 
-        r.update(link: "/requests/#{r.id}/preview-terms")
+        request.update(link: "/requests/#{request.id}/preview-terms")
 
         return request.update(expired: true)
       rescue Aws::S3::Errors::ServiceError => e

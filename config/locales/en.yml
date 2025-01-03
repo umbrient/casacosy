@@ -32,8 +32,14 @@
 en:
   cleaning_predictor:
     today:
-      clean: "<span class='text-success'>Clean today (%{weekday}) <i class='bi bi-check-circle'></i></span>"
-      no_clean: "<span class='text-danger'>No clean today (%{weekday}) <i class='bi bi-x-circle'></i></span>"
+      clean: "<span class='text-success'><i class='fa fa-broom'></i> (%{weekday})</span>"
+      no_clean: "<span class='text-danger'><i class='fa fa-broom'></i> (%{weekday})</span>"
     tomorrow:
-      clean: "<span class='text-success'>Clean tomorrow (%{weekday}) <i class='bi bi-check-circle'></i></span>"
-      no_clean: "<span class='text-danger'>No clean tomorrow (%{weekday}) <i class='bi bi-x-circle'></i></span>"
+      clean: "<span class='text-success'><i class='fa fa-broom'></i> (%{weekday})</span>"
+      no_clean: "<span class='text-danger'><i class='fa fa-broom'></i> (%{weekday})</span>"
+  pre_checkin_form:
+    switch_extras_payment_method:
+      deposit:  "Extras are automatically deducted from your deposit for convenience. If you wish to pay for them separately, please <a href='switch-extras-payment-method'>click here</a> to switch instantly."
+      separate:  "Extras will be charged separately. If you wish to pay for them from your deposit for convenience, please <a href='switch-extras-payment-method'>click here</a> to switch instantly."
+
+    

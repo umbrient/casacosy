@@ -1,0 +1,30 @@
+<h3 class='text-center py-2'>Welcome, <%= @booking.guest_name %>!</h3>  
+
+<p class='text-center'>Use the button below to access your full check-in guide</p>
+
+<div class="col bg-dark text-center text-white">
+  <h5 class='p-3'>Your key code is <span class='text-warning'><%= @booking.keycode || 'Contact host' %></span></h5>
+</div>
+
+
+<hr>
+
+<h5>Your booking details</h4>
+<table class='table table-sm table-striped table-bordered'>
+  <thead>
+    <tr><th>Booking Reference</th><td><%= @booking.reservation_id %></td></tr>
+    <tr><th>Guest count</th><td><%= @booking.guest_count %></td></tr>
+    <tr><th>Property Name</th><td><%= @booking.apartment.name %></td></tr>
+    <tr><th>Check-in time</th><td><%= @booking.check_in_time.strftime("%H:%M") %></td></tr>
+    <tr><th>Check-out time</th><td><%= @booking.check_out_time.strftime("%H:%M") %></td></tr>
+    <tr><th>Duration (Days: <%= (@booking.departure - @booking.arrival).to_i %>)</th><td><%= @booking.arrival.strftime("%d/%m/%y") %> - <%= @booking.departure.strftime("%d/%m/%y") %></td></tr>
+  </thead>
+</table>
+
+<div class="py-2 d-flex justify-content-center text-success">
+  <hr style="width:30%">
+</div>
+
+<div class="d-grid gap-2">
+  <button class="btn btn-primary"><a class="text-white no-underline" target="_blank" href="<%= @booking.guest_app_url %>">Guest Check-In Guide</a></button>
+</div>

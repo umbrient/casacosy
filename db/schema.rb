@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_30_005022) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_27_185836) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -65,29 +65,22 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_30_005022) do
     t.string "colour", default: "primary"
     t.integer "sort_order", default: 0
     t.boolean "has_parking", default: false
+    t.integer "lockbox_pin"
   end
 
   create_table "booking_addon_options", force: :cascade do |t|
     t.bigint "booking_id"
+    t.bigint "addon_id"
     t.bigint "addon_option_id"
-    t.integer "quantity"
-    t.boolean "yes_or_no"
-    t.text "text_value"
+    t.text "option_value"
+    t.decimal "current_price_pennies"
+    t.boolean "paid", default: false
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["addon_id"], name: "index_booking_addon_options_on_addon_id"
     t.index ["addon_option_id"], name: "index_booking_addon_options_on_addon_option_id"
     t.index ["booking_id"], name: "index_booking_addon_options_on_booking_id"
-  end
-
-  create_table "booking_addons", force: :cascade do |t|
-    t.bigint "booking_id"
-    t.bigint "addon_id"
-    t.text "details"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["addon_id"], name: "index_booking_addons_on_addon_id"
-    t.index ["booking_id"], name: "index_booking_addons_on_booking_id"
   end
 
   create_table "bookings", force: :cascade do |t|
@@ -136,6 +129,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_30_005022) do
     t.time "check_in_time", default: "2000-01-01 15:00:00"
     t.time "check_out_time", default: "2000-01-01 10:00:00"
     t.boolean "guest_has_viewed_extras", default: false
+    t.string "extras_payment_method", default: "deposit"
+    t.string "lockbox_code"
+    t.string "keynest_code"
     t.index ["apartment_id"], name: "index_bookings_on_apartment_id"
     t.index ["channel_id"], name: "index_bookings_on_channel_id"
     t.index ["guest_id"], name: "index_bookings_on_guest_id"
@@ -160,6 +156,21 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_30_005022) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "keys", force: :cascade do |t|
+    t.string "name"
+    t.bigint "apartment_id"
+    t.integer "store_id"
+    t.string "key_id"
+    t.string "status_type"
+    t.datetime "last_movement"
+    t.string "current_status"
+    t.string "drop_off_code"
+    t.string "collection_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["apartment_id"], name: "index_keys_on_apartment_id"
   end
 
   create_table "permissions", force: :cascade do |t|

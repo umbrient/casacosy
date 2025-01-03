@@ -1,0 +1,49 @@
+<h5>A little too early!</h5>
+
+<div class="alert alert-warning p-5 text-center">
+  <p>Deposits can only be held for a limited time. Therefore, we postpone this process until 24 hours before your booking.</p>
+
+  <p>We'll send you an automatic reminder prior to your booking to complete this step.</p>
+
+  <p>This page will unlock in</p>
+
+  <h3 id="timer"></h3>
+</div>
+
+<div class="row">
+  <div class="col d-flex justify-content-between">
+    <button id="btn-back" onclick="back()" class="btn btn-lg btn-light my-3"><i class="bi bi-chevron-left"></i> Back</button>
+  </div>
+</div>
+
+
+<script> 
+  const countdownElement = "<%= @until %>";
+  const untilTime = new Date(countdownElement); // Get time from data attribute
+
+  function updateTimer() {
+    const now = new Date();
+    const timeDifference = untilTime - now;
+
+    if (timeDifference <= 0) {
+      document.querySelector("#timer").textContent = "Time's up!";
+      clearInterval(timerInterval);
+      return;
+    }
+
+    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+
+
+    document.querySelector("#timer").textContent = `${days}d ${hours}h ${minutes}m`;
+  }
+
+  const timerInterval = setInterval(updateTimer, 1000);
+  updateTimer(); // Run immediately
+
+  function back(){
+    goToStep('extras')
+  }
+
+</script>

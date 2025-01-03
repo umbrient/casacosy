@@ -2,6 +2,7 @@ class Booking < ApplicationRecord
 
   scope :last_20, -> (date = Date.today) { where('arrival >= ?', date - 15.days) }
   scope :not_cancelled, -> { where.not(booking_type: 'cancellation') }
+  scope :no_requests, -> { left_joins(:requests).group(:id).having('COUNT(requests.id) = 0') }
   scope :departing, -> (date = Date.today) { where(departure: date ).not_cancelled }
   
   scope :current_bookings, -> (date = Date.today) do
@@ -27,6 +28,7 @@ class Booking < ApplicationRecord
   belongs_to :channel
   belongs_to :apartment
   has_many :requests
+  has_many :booking_addon_options
 
   def guest_count
     (adults.to_i + children.to_i)
@@ -45,6 +47,10 @@ class Booking < ApplicationRecord
     end
 
     given
+  end
+
+  def pre_checkin_url 
+    "/guests/#{reservation_id}/#{auth_code}"
   end
 
   def awaiting_id? 
@@ -67,6 +73,14 @@ class Booking < ApplicationRecord
     guest_app_url.split('=').last
   end
 
+  def depositable? 
+    data_created_at > '2024-10-01'
+  end
+
+  def self.find_by_reservation_id(reservation_id)
+    Booking.find_by("guest_app_url LIKE ?", "%#{reservation_id}%")
+  end
+
   def previous_bookings_count 
     Booking.where("(email = ? OR phone = ?) AND id <> ?", email, phone, id).count
   end
@@ -75,6 +89,31 @@ class Booking < ApplicationRecord
     "Deposit for #{guest_name} Booking ID #{reference_id} #{(channel.name)}"
   end
 
+  def auth_code 
+    messages = SmoobuApi.new.get_messages(reservation_id)
+    codes = messages['messages'].join.to_s.scan /\/#{reservation_id}\/(\d{4})/
+    code = codes.flatten.compact.uniq.first.to_i
+  end
+
+  def generate_lockbox_code
+  end 
+
+  def generate_collection_code
+    # no need for lockbox ones, as that will already have been generated.
+    # we don't generate keynest ones at the same time because of the valid to-from range on keynest keys.
+    # We'll only allow early check-in if they've paid
+    apartment.key.new_code(self) if apartment.key
+  end
+
+  def keycode 
+    if apartment.key
+     keynest_code
+    else 
+      code || lockbox_code
+    end 
+  end
+
+  # legacy
   def code
     messages = SmoobuApi.new.get_messages(reservation_id)
     codes = messages['messages'].join.to_s.scan /PIN =&nbsp\;(\d{4})|code below *(\d{6})|PIN :(\d{4})|PIN is:(\d{4})|Code: (\d{6})|(\d{6})<\/b>/

@@ -35,10 +35,14 @@
   </div>
 </div>
 
-<script>
+<script defer>
 document.querySelector("#btn-next").addEventListener("click", async function () { 
   const fileInput = document.querySelector("#file");
-  const feedback = (title, message, type) => Swal.fire(title, message, type);
+  const feedback = (title, message, type) => {
+    
+    Swal.hideLoading();
+    Swal.fire(title, message, type);
+}
 
   if (!fileInput.value) {
     feedback('Oops!', "Please upload a valid form of identification.", "error");
@@ -58,29 +62,28 @@ document.querySelector("#btn-next").addEventListener("click", async function () 
   formData.append("file", file);
 
   try {
-    const response = await fetch("/requests/<%= @request.id %>/upload-id", {
+      Swal.showLoading();
+      fetch(url + "upload-id", {
       method: "POST",
       headers: {
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token here
       },
       body: formData, // FormData automatically handles multipart/form-data
-    });
-
-    if (response.ok) {
-      location.reload();
-    } else {
-      const errorText = await response.text();
-      feedback('Oops!', `Failed to upload your ID. ${errorText}, please contact your administrator.`, "error");
-    }
+    }).then(response => response.json()).then(response => {
+    if (response?.success) {
+        refreshWithoutSteps();
+      } else {
+        feedback('Oops!', `Failed to upload your ID. Please contact your administrator.`, "error");
+      }
+    })
+    
   } catch (error) {
     feedback('Oops!', `An unexpected error occurred: ${error.message}, please contact your administrator.`, "error");
   }
 });
 
 document.querySelector("#btn-back").addEventListener("click", function(){
-
-  window.location = window.location.href + "&step=1";
-
+  goToStep('guest-details')
 });
 
 </script>

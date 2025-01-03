@@ -4,11 +4,11 @@ class StripeApi < Api
     Stripe.api_key = api_key
   end
 
-  def create_payment_intent(amount_pennies:, description:)
+  def create_payment_intent(amount_pennies:, description:, capture: false)
     Stripe::PaymentIntent.create({
       amount: amount_pennies,
       currency: 'gbp',
-      capture_method: 'manual',
+      capture_method: capture ? 'automatic' : 'manual',
       description: description,
       automatic_payment_methods: { enabled: true },  # Enable automatic payment methods
     })

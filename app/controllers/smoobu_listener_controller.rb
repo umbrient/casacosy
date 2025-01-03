@@ -1,9 +1,9 @@
 class SmoobuListenerController < ApplicationController
 
   def webhook 
-    byebug
-    Rails.logger.info "Webhook has been hit."
+    sync_keys
     sync_bookings
+    SendRequestEmailsJob.perform_now
     render json: { status: 'OK' } 
   end
 end

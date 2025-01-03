@@ -1,0 +1,363 @@
+<div id="running_total" style='position:fixed;bottom:0;left:0;background:#34a38b;z-index:9;width:100%;color:white;'>
+
+  <div class="content" style='padding:20px;'>
+    <div class="container text-end d-flex justify-content-between align-items-center">
+      <div>
+        <h3>Total</h3>
+      </div>  
+
+      <h1>£0.00</h1>
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+  <div class="col">
+    <h3>Anything you fancy?</h3>
+    <div class="alert alert-warning">
+      <%# <%= t("pre_checkin_form.switch_extras_payment_method." + @booking.extras_payment_method).html_safe %>
+      Extras are automatically deducted from your deposit for convenience. If your booking doesn't have a deposit, you will need to pay for these separately on the next page.
+    </div>
+    <hr>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <% @extras.each do |a| %>
+      <div class="card bg-light my-3">
+        <div class="card-header d-flex justify-content-between">
+          <div><b><%= a.name %></b></div> 
+          <div class="form-check form-switch">
+            <input 
+              class="form-check-input price-change parent" 
+              type="checkbox" 
+              role="switch"
+              data-addon-id="<%= a.id %>"
+              price="<%= a.addon_options.count == 1 ? a.addon_options.first.price_pennies_each : '' %>" 
+              id="include_addon_options_for_addon_id_<%= a.id %>" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#options_for_addon_id_<%= a.id %>"
+              
+            >
+          </div>
+        </div>
+
+        <div id="options_for_addon_id_<%= a.id %>" class="card-body collapse">
+          <% addon_options = a.addon_options.order(:sort_order) %>
+          
+          <%# variable price %>
+          <% if addon_options.select(&:booleanable).count > 1 %>
+            <div class="d-flex justify-content-between">
+              <% addon_options.each do |ao| %>
+                  <input type="radio" class="btn-check" price="<%= ao.price_pennies_each %>"  data-addon-id="<%= a.id %>" data-addon-option-id="<%= ao.id %>" name="addon_id_<%= a.id %>" id="addon_option_id_<%= ao.id %>" autocomplete="off">
+                  <label class="btn btn-outline-success" for="addon_option_id_<%= ao.id %>"><%= ao.name %></label>
+              <% end %>
+            </div>
+          
+          <%# single price %>
+          <% elsif addon_options.select(&:booleanable).count == 1 %> 
+            <% addon_options.each do |ao| %>
+              <p class="single" price="<%= ao.price_pennies_each %>" data-addon-id="<%= a.id %>" id="addon_option_id_<%= ao.id %>" data-addon-option-id="<%= ao.id %>"><%= ao.description %></p>
+            <% end %>
+
+          <%# variable price %>
+          <% elsif addon_options.select(&:quantifiable).count > 0 %>
+            <% addon_options.each do |ao| %>
+              <div class="text-center"><label for=""><%= ao.name %></label></div>
+              <div class="input-group mb-3">
+                <button class="btn btn-outline-secondary button-decrement" type="button">-</button>
+                <input 
+                  type="number" 
+                  price="<%= ao.price_pennies_each %>"
+                  class="form-control text-center" 
+                  id="addon_option_id_<%= ao.id %>" 
+                  data-addon-id="<%= a.id %>"
+                  data-addon-option-id="<%= ao.id %>"
+                  name="addon_option_id_<%= ao.id %>" 
+                  min="0" 
+                  max="<%= ao.max %>" 
+                  value="0"
+                >
+                <button class="btn btn-outline-secondary button-increment" type="button">+</button>
+              </div>
+            <% end %>
+
+          <% elsif addon_options.select(&:textable).count == 1 %>
+
+            <%# single price %>
+            <% addon_options.each do |ao| %>
+              <div class="form-floating" style="width:100%">
+                <textarea 
+                
+                  style="height:100px" 
+                  class="form-control single"
+                  price="<%= ao.price_pennies_each %>"
+                  data-addon-id="<%= a.id %>"
+                  data-addon-option-id="<%= ao.id %>"
+                  placeholder="Congratulations on your graduation! <3" 
+                  id="addon_option_id_<%= ao.id %>"
+                ></textarea>
+                <label for="addon_option_id_<%= ao.id %>">Card Message?</label>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>  
+  </div>
+</div>
+
+<div class="row" style='padding-bottom:100px;'>
+  <div class="col d-flex justify-content-between">
+    <button id="btn-back" onclick="back()" class="btn btn-lg btn-light my-3"><i class="bi bi-chevron-left"></i> Back</button> 
+    <button id="btn-next" onclick="next()" class="btn btn-lg btn-primary my-3">Next <i class="bi bi-chevron-right"></i></button>
+  </div>
+</div>
+
+<script>
+
+  const selectedExtras = <%= raw @selected_extras.to_json %>
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+
+    if(selectedExtras.length > 0) {
+      selectedExtras.forEach(function (i){
+          var addonId = parseInt(document.querySelector("#addon_option_id_" + i['addon_option_id']).getAttribute("data-addon-id"))
+          
+          // tick the parent first
+          document.querySelector("[data-addon-id='"+addonId+"']").click();
+          document.querySelector("[data-addon-id='"+addonId+"']").checked = true
+
+          var el = document.querySelector("#addon_option_id_" + i['addon_option_id'])
+
+          if (i['type'] == 'boolean') {
+            el.checked = true
+          } else if (i['type'] == 'text') {
+            el.textContent = i['option_value']
+          } else if (i['type'] == 'number') {
+            setTimeout(function(){
+              el.nextElementSibling.click()
+            },1000) 
+          }
+      });
+    }
+
+    updatePrice();
+
+  });
+
+  function back() {
+    goToStep('terms');
+  }
+
+  function next() {
+    save();
+
+    if(document.querySelector("#running_total h1").textContent == "£0.00") {
+      Swal.fire({
+        title: "No extras?",
+        text: "Are you sure you don't want any extras?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "I'll take another look!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+            goToStep('deposit');
+          }
+        })
+    } else {
+      goToStep('pay-extras');
+    }
+  }
+
+  // Handle decrement button clicks
+  document.querySelectorAll('.button-decrement').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const input = this.nextElementSibling; // The input field is next to the decrement button
+      const min = parseInt(input.min, 10);
+      let currentValue = parseInt(input.value, 10);
+
+      if (!isNaN(currentValue) && currentValue > min) {
+        input.value = currentValue - 1;
+        updatePrice();
+      }
+    });
+  });
+
+  // Handle increment button clicks
+  document.querySelectorAll('.button-increment').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const input = this.previousElementSibling; // The input field is before the increment button
+      const max = parseInt(input.max, 10);
+      let currentValue = parseInt(input.value, 10);
+
+      if (!isNaN(currentValue) && currentValue < max) {
+        input.value = currentValue + 1;
+        updatePrice();
+      }
+    });
+  });
+
+  document.querySelectorAll("[price]").forEach(elem => { 
+    
+    elem.addEventListener('click', function(event){
+      if (event.target.type == 'textarea') return;
+      if(!event.target.checked) {
+        var addonId = event.target.getAttribute('data-addon-id')
+        document.querySelectorAll("[name='addon_id_"+ addonId +"']").forEach( elem => elem.checked = false )
+        document.querySelectorAll("[data-addon-id='" + addonId + "']").forEach( child => {
+          if(child.type == 'number') child.value = 0;
+          else if (child.type == 'textarea') child.value = '';
+        });
+      }
+
+      updatePrice();
+    })
+
+    elem.addEventListener('keyup', debounce(function(event) {
+      if (event.target.type != 'textarea') return;  
+      updatePrice();
+    }, 1000));
+
+  });
+
+  function debounce(func, wait) {
+    let timeout;
+
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+  };
+  
+
+  function updatePrice() {
+    var totalPrice = 0;
+    document.querySelectorAll(".price-change").forEach(toggle => {
+      if(toggle.checked) {
+        var addonId = toggle.getAttribute("data-addon-id")
+        var options = document.querySelectorAll("[data-addon-id='"+ addonId +"']:not(.parent)")
+        var price = 0
+        if (options.length == 1) {
+          var option = options[0]
+          if(option.type == 'number') {
+              var basePrice = (parseInt(option.getAttribute('price')) || 0)
+              var qty = parseInt(option.value)
+              price = parseInt(basePrice * qty) / 100
+              totalPrice += price
+          }
+          else {
+            price = ((parseInt(option .getAttribute('price')) || 0) / 100);
+            totalPrice += price
+          }
+        } else { 
+          options.forEach(option => {
+
+            if(option.type == "radio" && option.checked) {
+              price = ((parseInt(option.getAttribute('price')) || 0) / 100);
+              totalPrice += price
+            }
+            else if (option.type == "number") {
+              var basePrice = (parseInt(option.getAttribute('price')) || 0)
+              var qty = parseInt(option.value)
+              price = parseInt(basePrice * qty) / 100
+              totalPrice += price
+            }
+
+          });
+        }
+      }
+    })
+    
+    document.querySelector("#running_total h1").textContent = `£${totalPrice.toFixed(2)}`;
+
+    if(totalPrice.toFixed(2) > 0) {
+      document.querySelector("#btn-next").innerHTML = "Pay <i class='bi bi-chevron-right'></i>"
+    } else {
+      document.querySelector("#btn-next").innerHTML = "Skip <i class='bi bi-chevron-right'></i>"
+    }
+
+  }
+
+  function save() {
+    let data = []
+    document.querySelectorAll(".price-change.parent").forEach((parent) => {
+      const addonId = parseInt(parent.getAttribute("data-addon-id"), 10);
+      
+
+      if (parent.checked) {
+        
+        // Gather sub-options
+        const options = document.querySelectorAll(
+          `[data-addon-id='${addonId}']:not(.parent)`
+        );
+
+        if (options.length > 0) {
+          
+          options.forEach((option) => {
+            const optionId = option.getAttribute("data-addon-option-id");
+            let value = null;
+
+            if (option.type === "radio" || option.type == undefined ) {
+              if(option.checked || option.type == undefined) {
+                value = true;
+                
+              }
+            } else if (option.type === "number") {
+                value = parseInt(option.value, 10) || 0;
+                if(value == 0) {
+                  value = null;
+                }
+              
+            } else if (option.type === "textarea") {
+                value = option.value.trim();
+            } else {
+                value = option.getAttribute('price')
+            }
+
+            // Add to data if value is meaningful
+            if (value !== null && value !== "") {
+              data.push({
+                addon_id: addonId,
+                addon_option_id: optionId ? parseInt(optionId, 10) : null,
+                value: value,
+              });
+            } else {
+
+            }
+          });
+        } else {
+          // No sub-options; include the parent addon as selected
+          const parentPrice = parseInt(parent.getAttribute("price"), 10) || 0;
+
+          data.push({
+            addon_id: addonId,
+            addon_option_id: null,
+            value: parentPrice > 0 ? true : null, // Indicating it was selected
+          });
+        }
+      } else {
+        
+      }
+    });
+
+
+    // Submit or handle the data
+    // Example: Submit via an AJAX call
+    fetch(url + 'update-extras', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+      body: JSON.stringify(data)
+    });
+  }
+
+</script>

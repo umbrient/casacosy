@@ -1,8 +1,5 @@
 class RequestsController < ApplicationController
 
-  load_and_authorize_resource
-  layout "end_user", only: [:show]
-
   def index 
     type = request_params[:type]
     booking_id = request_params[:booking_id]
@@ -44,101 +41,6 @@ class RequestsController < ApplicationController
 
   end
 
-  def show
-    @request = Request.find_by(id: params[:id])
-    original_id = params[:id]
-    @reservation_id = params[:r]
-    
-    return render plain: "This link has expired." unless  @request
-    return render plain: "This link is invalid." unless  @request.booking.reservation_id == @reservation_id
-
-    requests = @request.booking.requests.request.not_expired
-    @booking = @request.booking
-
-    force_step = params[:step].to_i
-
-    @deposit_amount = 150
-
-    if !@booking.basic_details_given? || force_step == 1
-      @step = 1 
-      @step_text = 'Guest Details'
-      return render 'basic_details'
-    elsif requests.id.any? || force_step == 2
-      @step = 2
-      @step_text = 'Upload Your ID'
-
-      if force_step == 2 
-        if @booking.requests.uploaded.any?
-          return render 'already_uploaded_id'
-        else 
-          # idk why you're here?
-          # link somehow expired but you haven't uploaded anything?
-        end
-      else 
-        @request = requests.id.last
-      end
-      
-    elsif requests.terms.any? || force_step == 3
-      @step = 3
-      @step_text = 'Your Signature'
-
-      if force_step == 3 
-        if @booking.requests.signed.any?
-          return render 'already_signed'
-        else 
-          # idk why you're here 
-        end        
-      end
-
-      @request = requests.terms.last
-
-    elsif !@booking.guest_has_viewed_extras? || force_step == 4
-      @step = 4 
-      @booking.update(guest_has_viewed_extras: true)
-      @step_text = 'Any Extras?'
-      @extras = @booking.apartment.addons
-      return render 'extras'
-    elsif requests.deposit.any? || force_step == 5
-        @step = 5
-        @step_text = 'Pay Deposit'
-        @request = requests.deposit.last
-    else
-      return render "check_in_instructions"
-    end
-
-    if original_id.to_i != @request.id
-      redirect_to(request_path(@request) + "?r=#{@reservation_id}") 
-    else 
-      render @request.request_type
-    end
-  end
-
-  def upload_id
-    args = {
-      params: params,
-      action: 'upload_id'
-    }
-    result = RequestUpdator.new(args).call
-    
-    render json: { success: result }
-  end 
-
-  def reupload_id 
-    r = Request.find_by(id: params[:id])
-    return unless r || r.booking.reservation_id != params[:reservation_id]
-
-    args = { 
-      booking_id: r.booking.id,
-      request_type: 'id',
-      request_action: 'request',
-      user_id: 0
-    }
-
-    if RequestCreator.new(args, true).call
-      return render json: 'success'
-    end
-  end
-
   def preview_id
     
     @r = Request.find(params[:id])
@@ -146,36 +48,6 @@ class RequestsController < ApplicationController
     
     @img = aws_api.get_id_link(request: @r)
     
-  end
-
-  def pay_deposit
-    args = {
-      params: params,
-      action: 'pay_deposit'
-    }
-
-    result = RequestUpdator.new(args).call
-
-    if request.post? 
-      return render json: { success: result }
-    else 
-      return redirect_to(request_path(@request) + "?r=" + @request.booking.reservation_id)
-    end
-
-
-  end
-
-  def agree_to_terms
-    args = {
-      params: params,
-      action: 'agree_to_terms'
-    }
-
-    result = RequestUpdator.new(args).call
-
-    render json: { success: result }
-
-
   end
 
   def release_deposit

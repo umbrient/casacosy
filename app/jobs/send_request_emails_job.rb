@@ -4,7 +4,8 @@ class SendRequestEmailsJob < ApplicationJob
   def perform(*args)
     Rails.logger.info "::: Start Periodic Emails Job :::"
 
-    bookings = Booking.next_48h_checkins
+    # get all future bookings without requests and make requests for 'em
+    bookings = Booking.future_bookings.no_requests
 
     Rails.logger.info "#{bookings.count} bookings are checking in within the next 24h"
 

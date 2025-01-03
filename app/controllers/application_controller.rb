@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
-  check_authorization unless: :no_login_required?
-  before_action :authenticate_user!, except: [:no_login_required?]
+  check_authorization :unless => :devise_controller?
+  before_action :authenticate_user!, unless: :guest?
   
   rescue_from CanCan::AccessDenied do |exception|
     render plain: "This page does not exist."
@@ -18,17 +18,22 @@ class ApplicationController < ActionController::Base
     starling_api.get_transactions
   end
 
-  def no_login_required?
-    devise_controller? || controller_path == "smoobu_listener"
+  def sync_keys
+    keynest_api.get_keys
   end
 
   def sync 
     sync_bookings
     sync_transactions
+    sync_keys
   end 
 
 
   private 
+
+  def guest?
+    controller_name == 'guests' 
+  end
 
   def starling_api
     @smoobu_api ||= StarlingApi.new
@@ -36,6 +41,10 @@ class ApplicationController < ActionController::Base
 
   def smoobu_api
     @smoobu_api ||= SmoobuApi.new
+  end
+
+  def keynest_api
+    @keynest_api ||= KeynestApi.new
   end
 
 

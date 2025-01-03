@@ -18,15 +18,16 @@
   requestId = <%= @request.id %>
 
   function next(){
-    window.location.href = window.location.href.split("&")[0] + "&step=3"
+    goToStep('terms')
   }
 
   function back(){
-    window.location.href = window.location.href.split("&")[0] + "&step=1"
+    goToStep('guest-details')
   }
 
   function reupload(){
-    fetch('/requests/' + requestId + "/reupload-id", {
+    Swal.showLoading();
+    fetch(url + "reupload-id", {
       method: 'POST',
       headers: {
       'Content-Type': 'application/json',
@@ -38,7 +39,11 @@
       })
     }).then(response => {
       if (response.ok) {
-        window.location = window.location.href.split("&")[0]
+        // refresh without the force_step param in case they were forced here.
+        refreshWithoutSteps();
+      } else {
+        Swal.hideLoading(); 
+        Swal.fire("Oops", "Looks like an error occurred. Please contact your administrator.", "error");
       }
     })
   }

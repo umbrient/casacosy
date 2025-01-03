@@ -21,6 +21,9 @@ class SmoobuApi < Api
     new_bookings = []
 
     if bookings
+
+      updates = 0
+
       bookings.flatten.each do |booking| 
 
         unless Apartment.find_by(id: booking['apartment']['id'])
@@ -34,12 +37,12 @@ class SmoobuApi < Api
         if Booking.find_by(reference_id: booking['reference-id']) 
           existing = Booking.find_by(reference_id: booking['reference-id']) 
           if something_different?(booking, existing)
+            updates += 1
             Rails.logger.info "Something has changed with reservation ID #{existing.reservation_id}"
-            existing.update(booking_object(booking))
+            existing.update(booking_object(booking, existing))
           end 
           next
         end
-
         new_bookings << booking_object(booking)
       end
     end
@@ -59,7 +62,7 @@ class SmoobuApi < Api
       @api_key ||= (Rails.application.credentials.dig(:smoobu, :api_key) || ENV['SMOOBU_API_KEY'])
     end
 
-    def booking_object(obj) 
+    def booking_object(obj, existing = nil) 
 
       payment_charge = 0 
         
@@ -67,7 +70,7 @@ class SmoobuApi < Api
         payment_charge = ((0.0130 * obj['price'].to_f))
       end 
 
-      {
+      obj = {
         reference_id: obj['reference-id'],
         booking_type: obj['type'],
         arrival: obj['arrival'],
@@ -100,8 +103,12 @@ class SmoobuApi < Api
         language: obj['language'],
         guest_app_url: obj['guest-app-url'],
         is_blocked_booking: obj['is-blocked-booking'],
-        guest_id: obj['guestId']
+        guest_id: obj['guestId'],
+        lockbox_code: format('%04d', rand(0..9999))
       }
+      
+      return obj
+
     end 
 
     def something_different?(booking, existing)  
@@ -109,8 +116,8 @@ class SmoobuApi < Api
         booking['type'] == existing.booking_type,
         booking['children'] == existing.children,
         booking['adults'] == existing.adults,
-        booking['arrival'] == existing.arrival,
-        booking['departure'] == existing.departure,
+        booking['arrival'].to_date == existing.arrival,
+        booking['departure'].to_date == existing.departure,
         booking['price'] == existing.price,
     ].include? false
     end

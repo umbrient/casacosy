@@ -1,15 +1,26 @@
-<div class="d-flex align-items-center pb-5">
-  <h3 class='pe-3'><%= @booking.guest_name %></h3> <h5>(Ref: <%= @booking.reference_id %>)</h5>
+<div class="d-flex align-items-center pb-5 justify-content-between">
+  <div>
+    <h3 class='pe-3'><%= @booking.guest_name %></h3>
+  </div>
+
+  <div>
+    <button class='btn btn-primary'><a target="_blank" class="text-decoration-none text-white" href="<%= @booking.pre_checkin_url %>">Pre-check-in form</a></button>
+    <button class='btn btn-primary disabled'>Refund</button>
+    <button class='btn btn-primary disabled'>Invoice</button>
+  </div>
 </div>
 
-
 <h4 class='pb-3'>Booking details</h4>
-<table class="table table-striped table-bordered">
+<table class="table table-striped table-bordered table-sm">
 
   <tbody>
       <tr> 
         <th>Booked at</th>
-        <td><%= @booking.data_created_at %></td>
+        <td><%= @booking.data_created_at.strftime("%d/%m/%Y") %></td>
+      </tr>
+      <tr>
+        <th>Ref</th>
+        <td><%= @booking.reference_id %></td>
       </tr>
       <tr> 
         <th>Flat</th>
@@ -17,11 +28,11 @@
       </tr>
       <tr> 
         <th>Arrival</th>
-        <td><%= @booking.arrival %></td>
+        <td><%= @booking.pretty_arrival %></td>
       </tr>
       <tr> 
         <th>Departure</th>
-        <td><%= @booking.departure %></td>
+        <td><%= @booking.pretty_departure %></td>
       </tr>
       <tr> 
         <th>Adults</th>
@@ -37,7 +48,7 @@
       </tr>
       <tr> 
         <th>Code</th>
-        <td><%= @booking.code %></td>
+        <td><%= @booking.keycode || "N/A" %></td>
       </tr>
       <tr> 
         <th>Telephone</th>
