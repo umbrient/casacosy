@@ -94,6 +94,7 @@ class Booking < ApplicationRecord
     messages = SmoobuApi.new.get_messages(reservation_id)
     codes = messages['messages'].join.to_s.scan /\/#{reservation_id}\/(\d{4})/
     code = codes.flatten.compact.uniq.first.to_i
+    1234 if code.zero?
   end
 
   def generate_lockbox_code
