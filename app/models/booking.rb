@@ -78,6 +78,10 @@ class Booking < ApplicationRecord
     data_created_at > '2024-10-01'
   end
 
+  def regular? 
+    previous_bookings_count >= 5
+  end
+
   def self.find_by_reservation_id(reservation_id)
     Booking.find_by("guest_app_url LIKE ?", "%#{reservation_id}%")
   end

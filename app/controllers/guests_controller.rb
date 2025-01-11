@@ -178,6 +178,10 @@ class GuestsController < ActionController::Base
         return render 'pre_deposits' 
       end
 
+      if @booking.regular?
+        return render 'regular_guest' 
+      end
+
       @step = 5
       @step_text = 'Pay Deposit'
       @request = requests.deposit.last
@@ -198,7 +202,7 @@ class GuestsController < ActionController::Base
 
 
   def no_deposit 
-    unless @booking.depositable? 
+    if !@booking.depositable? || @booking.regular?
       @booking.requests.request.deposit.not_expired.last.update(expired: true)
     end 
     return redirect_to("/guests/#{@reservation_id}/#{@code}")

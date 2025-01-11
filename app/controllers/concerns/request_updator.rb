@@ -32,7 +32,7 @@ class RequestUpdator
     file_name = (request.booking.guest_name || SecureRandom.alphanumeric(7).downcase)
     file_name += Time.now.strftime("%H%M%S").to_s
       
-    path = "SAs/#{request_type}/#{date}/#{request.booking.apartment.name}/#{file_name}#{ext}"
+    path = "#{Rails.env}/SAs/#{request_type}/#{date}/#{request.booking.apartment.name}/#{file_name}#{ext}"
 
     if @params[:file]
       begin
@@ -151,7 +151,6 @@ class RequestUpdator
 
     return unless booking 
     return unless booking.auth_code == code
-
     request = booking.requests.request&.not_expired&.terms&.first
     return unless request 
 
@@ -163,7 +162,7 @@ class RequestUpdator
     date = Date.today.strftime("%Y/%B/%d")
     file_name = request.booking.guest_name || request.booking.reservation_id || SecureRandom.alphanumeric(7).downcase
       
-    path = "SAs/#{request_type}/#{date}/#{request.booking.apartment.name}/#{file_name}.pdf"
+    path = "#{Rails.env}/SAs/#{request_type}/#{date}/#{request.booking.apartment.name}/#{file_name}.pdf"
 
     if @params[:file]
       begin
