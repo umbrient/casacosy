@@ -29,7 +29,7 @@ Deposits are pre-authorised 'holds' on your bank, that are released after a serv
 
 <script src="https://js.stripe.com/v3/"></script>
 <script defer>
-  const stripe = Stripe('<%= Rails.application.credentials.dig(:stripe, :live, :publishable_key) %>');
+  const stripe = Stripe('<%= Rails.application.credentials.dig(:stripe, :publishable_key) %>');
 
   function back(){
     goToStep('extras');
