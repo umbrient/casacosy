@@ -94,54 +94,64 @@
     if (btnCapture) {
       document.querySelector('#btn-capture').addEventListener('click', function(e){
 
+        
+
         const requestId = e.target.getAttribute('data-request-id');
 
-        Swal.fire({
-          title: `How much would you like to capture?`,
-          input: 'text',
-          inputPlaceholder: 'e.g. 50',
-          showCancelButton: true
-        }).then((amount) => {
-        
-          if (amount.isConfirmed) {
+        Swal.fire("WARNING!", "Capturing any amount from the deposit will immediately release the remainder to the guest. Please make sure you know exactly what to deduct, prior.", "warning")
+        .then(() => {
+          Swal.fire({
+            title: `How much would you like to capture?`,
+            input: 'text',
+            inputPlaceholder: 'e.g. 50',
+            showCancelButton: true
+          }).then((amount) => {
+          
+            if (amount.isConfirmed) {
 
-            if(amount.value > 150) {
-              Swal.fire("Too much!", "You can't capture more than the original payment amount.", "warning")
-              return
-            }
-
-            Swal.fire({
-              title: `Notes on why you're capturing this amount (£${amount.value})`,
-              input: 'textarea',
-              inputPlaceholder: 'Enter your notes here',
-              showCancelButton: true
-            }).then((notesResult) => {
-              if (notesResult.isConfirmed) {
-                const notes = notesResult.value;
-                
-                fetch('/requests/' + requestId + "/capture-deposit", {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                  },
-                  body: JSON.stringify({
-                    request_action: 'capture',
-                    booking_id: <%= @booking.id %>,
-                    amount: amount.value,
-                    notes: notes,
-                  })
-                }).then(response => {
-                  if (response.ok) {
-                    Swal.fire('Success', 'Your request has been submitted.', 'success');
-                  }
-                })
-
+              if(amount.value > 150) {
+                Swal.fire("Too much!", "You can't capture more than the original payment amount.", "warning")
+                return
               }
-            })
-          }
+
+              Swal.fire({
+                title: `Notes on why you're capturing this amount (£${amount.value})`,
+                input: 'textarea',
+                inputPlaceholder: 'Enter your notes here',
+                showCancelButton: true
+              }).then((notesResult) => {
+                if (notesResult.isConfirmed) {
+                  const notes = notesResult.value;
+                  
+                  fetch('/requests/' + requestId + "/capture-deposit", {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                      request_action: 'capture',
+                      booking_id: <%= @booking.id %>,
+                      amount: amount.value,
+                      notes: notes,
+                    })
+                  }).then(response => {
+                    if (response.ok) {
+                      Swal.fire('Success', 'Your request has been submitted.', 'success');
+                    }
+                  })
+
+                }
+              })
+            }
+          })
         })
+      
+      
+      
       });
+
+
     }
 
     const btnRelease = document.querySelector('#btn-release')
