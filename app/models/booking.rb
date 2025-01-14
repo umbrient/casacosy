@@ -87,6 +87,7 @@ class Booking < ApplicationRecord
   end
 
   def previous_bookings_count 
+    # TODO: This doesn't account for cancellations
     Booking.where("(email = ? OR phone = ?) AND id <> ?", email, phone, id).count
   end
 
@@ -102,6 +103,9 @@ class Booking < ApplicationRecord
   end
 
   def generate_lockbox_code
+    code = format('%04d', rand(0..9999))
+    self.update(lockbox_code: code)
+    return code
   end 
 
   def generate_collection_code
@@ -115,7 +119,7 @@ class Booking < ApplicationRecord
     if apartment.key
      keynest_code
     else 
-      code || lockbox_code
+      code || lockbox_code || generate_lockbox_code
     end 
   end
 
