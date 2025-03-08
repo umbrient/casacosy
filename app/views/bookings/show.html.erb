@@ -83,8 +83,33 @@
         <td><%= @booking.previous_bookings_count %></td>
       </tr>
   </tbody>
-
 </table>
+
+<% if current_user.is_manager? || current_user.is_admin? %>
+<div class="row">
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header">
+        Guest ID
+      </div>
+      <div class="card-body">
+        <img src="<%= @img %>" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-header">
+        Guest Terms
+      </div>
+       <div class="card-body">
+        <a href="<%= @terms %>">Download Signed Terms</a>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function(){
