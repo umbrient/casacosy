@@ -93,7 +93,9 @@ class RequestUpdator
         user: nil
       });
         
-      return request.update(expired: true)
+      if status == 'Paid'
+        return request.update(expired: true)
+      end
 
       return false
     end 
