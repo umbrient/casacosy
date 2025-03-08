@@ -94,7 +94,11 @@
         Guest ID
       </div>
       <div class="card-body">
+        <% if @img.nil? %>
+          <div class="alert alert-secondary">Not uploaded yet.</div>
+        <% else %>
         <img src="<%= @img %>" alt="">
+        <% end %>
       </div>
     </div>
   </div>
@@ -104,7 +108,12 @@
         Guest Terms
       </div>
        <div class="card-body">
+        <% if @img.nil? %>
+          <div class="alert alert-secondary">Not signed yet.</div>
+        <% else %>
         <a href="<%= @terms %>">Download Signed Terms</a>
+        <% end %>
+        
       </div>
     </div>
   </div>
