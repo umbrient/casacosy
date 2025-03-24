@@ -39,8 +39,6 @@ class GuestsController < ActionController::Base
         item[:current_price_pennies] = addon_option.price_pennies_each
         @booking.booking_addon_options.create(item)
       end
-
-
     end
   end
 
@@ -110,7 +108,7 @@ class GuestsController < ActionController::Base
       # generate a new keycode?
       @booking.generate_lockbox_code if @booking.lockbox_code.nil?
       @booking.generate_collection_code if @booking.keynest_code.nil?
-      return render 'check_in_temp'
+      return render 'check_in_temp' 
     end 
     
     
@@ -201,7 +199,7 @@ class GuestsController < ActionController::Base
   end
 
 
-  def no_deposit 
+  def no_deposit
     if !@booking.depositable? || @booking.regular?
       @booking.requests.request.deposit.not_expired.last.update(expired: true)
     end 

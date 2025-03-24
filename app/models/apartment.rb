@@ -7,6 +7,8 @@ class Apartment < ApplicationRecord
 
   has_one :key
 
+  scope :active, -> { where(is_enabled: true) } 
+
   def previous_booking
     bookings.past_bookings.first
   end

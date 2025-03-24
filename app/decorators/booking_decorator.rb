@@ -35,11 +35,14 @@ class BookingDecorator < Draper::Decorator
      "#{object.guest_name} (<i class='bi bi-person'></i>x#{object.guest_count})".html_safe
   end
 
-  def pretty_arrival
+  def pretty_arrival(time_only = false)
     arrival_datetime = DateTime.new(object.arrival.year, object.arrival.month, object.arrival.day, object.check_in_time.hour, object.check_in_time.min)
     eta_text = guest_input_eta ? guest_input_eta.strftime("%H:%M") : "N/A"
     arrival_datetime.strftime("%d/%m/%Y %H:%M") + " (ETA: #{eta_text})"
+    arrival_datetime.strftime("%H:%M") + " (ETA: #{eta_text})" if time_only
   end
+
+  
 
   def pretty_departure
     departure_datetime = DateTime.new(object.departure.year, object.departure.month, object.departure.day, object.check_out_time.hour, object.check_out_time.min)

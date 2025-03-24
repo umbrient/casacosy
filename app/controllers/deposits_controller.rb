@@ -3,7 +3,7 @@ class DepositsController < ApplicationController
 
   def index
     @upcoming_bookings = Booking.next_48h_checkins.decorate
-    @previous_bookings = Booking.past_bookings.limit(20).decorate
+    @all_bookings = Booking.order(arrival: :desc).paginate(page: params[:page], per_page: 20).decorate
   end
   
 end

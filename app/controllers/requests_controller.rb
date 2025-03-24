@@ -42,6 +42,8 @@ class RequestsController < ApplicationController
   end
 
   def preview_id
+
+    byebug
     
     @r = Request.find(params[:id])
     return unless @r

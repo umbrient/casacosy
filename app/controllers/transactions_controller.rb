@@ -5,6 +5,6 @@ class TransactionsController < ApplicationController
   def index 
     sync_transactions
 
-    @transactions = Transaction.unprocessed.settled.order(transaction_timestamp: :desc).paginate(page: params[:page], per_page: 20)
+    @transactions = Transaction.unprocessed.out.settled.order(transaction_timestamp: :desc).paginate(page: params[:page], per_page: 20)
   end  
 end

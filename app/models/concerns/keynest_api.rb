@@ -53,7 +53,7 @@ class KeynestApi < Api
     response = conn.post("https://api.keynest.com/api/v3/Codes/CollectionCode/LOC01", args.to_json) { |req| req.headers['ApiKey'] = api_key }
     response = JSON.parse(response.body) if response.success?
 
-    collection_code = response['ResponsePacket']['CollectionCode']
+    collection_code = response['ResponsePacket']['CollectionCode'] rescue 0
 
     booking.update(keynest_code: collection_code)
   end

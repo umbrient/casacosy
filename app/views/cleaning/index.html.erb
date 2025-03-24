@@ -2,19 +2,34 @@
 
 
 <% if true %>
-<b>You have <span style='color:orange;font-size:20px;'>2</span> cleans today.</b>
-<div class="container mt-3">
-  <div class="row p-4">
-    <a href="/" class='mb-5'>
-      <div class="col p-5 bg-primary mx-1 text-center fs-1 text-white" style='position:relative;'>
-        Navy
-        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
-          <span>Not done</span>
-          <span class="visually-hidden">unread messages</span>
-        </span>
+<div class='mb-3'>You have <span style='color:orange;font-size:20px;'>2</span> cleans today.</div>
+
+<div class="row">
+  <% @apartments.each do |a| %>
+  <% current_booking = a&.bookings&.current_bookings(@today)&.first&.decorate %>
+  <div class="col-* mb-3">
+    <div class="card">
+      <div class="card-header">
+        <%= a.name  %>
       </div>
-    </a>
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div class="d-flex flex-column">
+            <span><%= (a.bookings.departing(@today).any? ? t("cleaning_predictor.today.clean", weekday: @todays_day.first(3)) : t("cleaning_predictor.today.no_clean", weekday: @todays_day.first(3))).html_safe %> </span>
+            <span><%= (a.bookings.departing(@tomorrow).any? ? t("cleaning_predictor.tomorrow.clean", weekday: @tomorrows_day.first(3)) : t("cleaning_predictor.tomorrow.no_clean", weekday: @tomorrows_day.first(3))).html_safe %> </span>
+          </div>
+          <div>
+            <h4><%= current_booking.guest_count %> people</h4>
+          </div> 
+
+          <div>
+            <h3><%= current_booking.pretty_arrival(true) %></h3>
+          </div> 
+        </div>
+      </div>
+    </div>
   </div>
+  <% end %>
 </div>
 
 <% else %>

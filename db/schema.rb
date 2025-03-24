@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_03_111540) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_20_184235) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -68,6 +68,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_03_111540) do
     t.integer "lockbox_pin"
     t.integer "beds"
     t.integer "sofabeds"
+    t.boolean "is_enabled", default: false
   end
 
   create_table "booking_addon_options", force: :cascade do |t|
@@ -152,6 +153,32 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_03_111540) do
   create_table "deposits", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "direct_payment_types", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "direct_payments", force: :cascade do |t|
+    t.bigint "apartment_id"
+    t.bigint "booking_id"
+    t.bigint "direct_payment_type_id"
+    t.string "payment_id"
+    t.string "payment_intent"
+    t.string "customer_name"
+    t.string "email"
+    t.integer "total_pennies"
+    t.string "status"
+    t.text "description"
+    t.boolean "processed", default: false
+    t.datetime "data_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["apartment_id"], name: "index_direct_payments_on_apartment_id"
+    t.index ["booking_id"], name: "index_direct_payments_on_booking_id"
+    t.index ["direct_payment_type_id"], name: "index_direct_payments_on_direct_payment_type_id"
   end
 
   create_table "expense_types", force: :cascade do |t|
@@ -243,6 +270,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_03_111540) do
     t.boolean "processed", default: false
     t.integer "expense_type_id"
     t.string "payment_method", default: "business_bank"
+    t.index ["feedItemUid"], name: "index_transactions_on_feedItemUid", unique: true
   end
 
   create_table "users", force: :cascade do |t|

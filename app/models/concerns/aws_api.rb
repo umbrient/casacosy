@@ -3,6 +3,7 @@ class AwsApi < Api
   BUCKET = 'sa-portal'
 
   def get_id_link(request:)
+    return unless request.notes
     s3 = Aws::S3::Resource.new
     bucket = s3.bucket(BUCKET)
     obj = bucket.object(request.notes)

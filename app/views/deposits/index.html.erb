@@ -9,7 +9,6 @@
       <th>Platform</th>
       <th>Dates</th>
       <th>Apartment</th>
-      <th>Price</th>
       <th>ID Status</th>
       <th>Deposit Status</th>
       <th>Terms & Conditions</th>
@@ -23,7 +22,6 @@
         <td><%= booking.channel.name %></td>
         <td><%= "#{booking.arrival} (#{distance_of_time_in_words(booking.arrival, booking.departure)})" %> </td>
         <td><%= booking.apartment.name %> </td>
-        <td>£<%= "#{ number_with_precision(booking.price, precision: 2) || 'N/A'}" %></td>
         <td><%= booking.id_status %></td>
         <td><%= booking.deposit_status %></td>
         <td><%= booking.terms_status %></td>
@@ -33,18 +31,20 @@
 </table>
 
 
-<h3 class='py-5'>Previous bookings</h3>
+<h3 class='py-5'>All bookings</h3>
+<label for="">Find a booking</label>
+<form action="" class="d-flex">
+  <input type="text" placeholder="Search by forename, surname, email, or telephone." class="form-control rounded-end-0">
+  <button class="btn btn-primary rounded-start-0" type="submit">Search</button>
+</form>
 
-
-
-<table class='table table-striped table-boredered' style='opacity:.3'>
+<table class='table table-striped table-boredered'>
   <thead>
     <tr>
       <th>Name</th>
       <th>Platform</th>
       <th>Dates</th>
       <th>Apartment</th>
-      <th>Price</th>
       <th>ID Status</th>
       <th>Deposit Status</th>
       <th>Terms & Conditions</th>
@@ -52,22 +52,21 @@
   </thead>
 
   <tbody>
-      <tbody>
-    <% @previous_bookings.each do |booking| %>
+    <% @all_bookings.each do |booking| %>
       <tr data-id="<%= booking.id %>">
         <td><%= link_to(booking.link_text, booking_path(booking.id)) %></td>
         <td><%= booking.channel.name %></td>
         <td><%= "#{booking.arrival} (#{distance_of_time_in_words(booking.arrival, booking.departure)})" %> </td>
         <td><%= booking.apartment.name %> </td>
-        <td>£<%= "#{ number_with_precision(booking.price, precision: 2) || 'N/A'}" %></td>
         <td><%= booking.id_status %></td>
         <td><%= booking.deposit_status %></td>
         <td><%= booking.terms_status %></td>
       </tr>
     <% end %>
   </tbody>
-  </tbody>
 </table>
+
+<%= will_paginate @all_bookings.object, :container => false %>
 
 
 <script>
