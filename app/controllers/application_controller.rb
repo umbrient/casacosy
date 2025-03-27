@@ -14,6 +14,34 @@ class ApplicationController < ActionController::Base
     smoobu_api.get_all_past_reservations
   end
 
+  def release_deposits 
+    bookings = Booking.checked_out_10_to_3_days_ago
+    
+    return unless bookings
+
+    bookings.each do |b| 
+      request = b.requests.deposit.last
+      
+      next unless request 
+      next unless request.paid?
+
+      payment_intent = stripe_api.retrieve_payment(request.notes)
+
+      if payment_intent.status == 'requires_capture'
+        
+        payment_intent.cancel 
+  
+        Request.create({
+          booking_id: b.id,
+          request_type: request.request_type, 
+          request_action: 'Released',
+          notes: "Auto-released by the system at #{Time.now}",
+          user: -1
+        });
+      end
+    end
+  end
+
   def sync_transactions 
     starling_api.get_transactions
   end

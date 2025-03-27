@@ -1,5 +1,6 @@
 class Booking < ApplicationRecord
 
+  scope :checked_out_10_to_3_days_ago, ->  { where('departure BETWEEN ? and ?', 10.days.ago, 3.days.ago) }
   scope :last_20, -> (date = Date.today) { where('arrival >= ?', date - 15.days) }
   scope :not_cancelled, -> { where.not(booking_type: 'cancellation') }
   scope :no_requests, -> { left_joins(:requests).group(:id).having('COUNT(requests.id) = 0') }

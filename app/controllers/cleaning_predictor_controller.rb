@@ -5,6 +5,7 @@ class CleaningPredictorController < ApplicationController
   def index 
     sync_bookings 
     sync_keys rescue nil 
+    release_deposits rescue nil 
   
     @apartments = Apartment.all.order(sort_order: :asc)
     @today = params[:date].nil? ? Date.today : params[:date].to_date
