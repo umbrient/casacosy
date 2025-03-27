@@ -75,5 +75,9 @@ class ApplicationController < ActionController::Base
     @keynest_api ||= KeynestApi.new
   end
 
+  def stripe_api
+    @stripe_api ||= StripeApi.new
+  end
+
 
 end
