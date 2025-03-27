@@ -27,16 +27,15 @@ class ApplicationController < ActionController::Base
 
       payment_intent = stripe_api.retrieve_payment(request.notes)
 
-      if payment_intent.status == 'requires_capture'
-        
-        payment_intent.cancel 
-  
+      payment_intent.cancel if payment_intent.status == 'requires_capture'
+      
+      if b.requests.where(request_action: 'Released').none?
         Request.create({
           booking_id: b.id,
           request_type: request.request_type, 
           request_action: 'Released',
           notes: "Auto-released by the system at #{Time.now}",
-          user: -1
+          user_id: -1
         });
       end
     end
