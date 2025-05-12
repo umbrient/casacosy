@@ -44,6 +44,7 @@ Rails.application.routes.draw do
     post '/create-extras-intent', to: 'guests#create_extras_intent'
     post '/pay-deposit', to: 'guests#pay_deposit'
     post '/pay-extras', to: 'guests#pay_extras'
+    post '/complaint', to: 'guests#create_complaint'
 
     get '/pay-deposit-remotely', to: 'guests#pay_deposit'
     get '/switch-extras-payment-method', to: 'guests#switch_extras_payment_method'

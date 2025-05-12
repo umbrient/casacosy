@@ -30,6 +30,7 @@ class Booking < ApplicationRecord
   belongs_to :channel
   belongs_to :apartment
   has_many :requests
+  has_many :complaints
   has_many :booking_addon_options
 
   def guest_count

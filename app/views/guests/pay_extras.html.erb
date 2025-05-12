@@ -1,4 +1,8 @@
-<h3>Hey, <%= @request.booking.guest_name %>!</h3>
+  <% if @request %>
+    <h3>Hey, <%= @request.booking.guest_name %>!</h3>
+  <% else %>
+    <h3>Hey, <%= @booking.guest_name %>!</h3>
+  <% end %>
 <hr>
 <h5>Purchase your extras</h5>
 

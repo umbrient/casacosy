@@ -80,16 +80,31 @@ class GuestsController < ActionController::Base
     end 
   end
 
+  def create_complaint
+
+    booking = Booking.find params[:guest][:booking_id]
+
+    return unless booking 
+
+    created = false 
+    
+    created = Complaint.create(
+      booking_id: params[:guest][:booking_id],
+      regarding: params[:guest][:regarding],
+      complaint_body: params[:guest][:complaint_body],
+    ) if booking.complaints.count <= 5
+
+    if created 
+      render json: { title: 'Feedback submitted', body: 'Please get in touch with our staff if you would like further resolution or responses to your feedback.', status: 'success' }
+    else 
+      render json: { title: 'Feedback error', body: 'Please get in touch with our staff if you would like further resolution or responses to your feedback', status: 'warning' }
+    end 
+    
+  end
+
   def show
 
-    @deposit_amount = DEPOSIT_AMOUNT
-
-    # `requests.request` meaning of the requests, get the top item from UNDONE/OPEN requests.
-    any_requests = @booking.requests.any? 
-
-    unless any_requests
-      SendRequestEmailsJob.new.perform_one(@booking)
-    end
+    @deposit_amount = @booking.deposit.to_f > 0 ? @booking.deposit.to_f : DEPOSIT_AMOUNT 
 
     @request = @booking.requests.request.first
 
@@ -102,16 +117,18 @@ class GuestsController < ActionController::Base
     force_step = params[:step].to_s
 
     # return render "check_in_instructions"
-    if @booking.requests.request.not_expired.none?
+    if @booking.requests.request.not_expired.none? && force_step.nil?
       # either has no requests or bro is ready.
       
-      # generate a new keycode?
-      @booking.generate_lockbox_code if @booking.lockbox_code.nil?
-      @booking.generate_collection_code if @booking.keynest_code.nil?
+      # generate a new keycode?      
+      if @booking.apartment.key
+        @booking.generate_collection_code if @booking.keynest_code.nil?
+      else 
+        @booking.generate_lockbox_code if @booking.lockbox_code.nil?
+      end 
+
       return render 'check_in_temp' 
     end 
-    
-    
     
     if !@booking.basic_details_given? || force_step == 'guest-details'
       @step = 1 
@@ -190,13 +207,20 @@ class GuestsController < ActionController::Base
       end
 
     else
-      render plain: "Please contact your administrator #114."
+      # render plain: "Please contact your administrator #114."
+      return render 'check_in_temp' 
+
     end
 
 
-    render @request.request_type
+    if @request
+      return render @request.request_type
+    else 
+      return render 'check_in_temp' 
+    end
 
   end
+  
 
 
   def no_deposit

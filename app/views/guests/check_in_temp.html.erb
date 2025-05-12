@@ -21,18 +21,69 @@
   </tbody>
 </table>
 
-<h4 class='py-3'><i class="fa fa-sign-in pe-3"></i>Check In</h4>
+<h4 class='py-3'><i class="fa fa-sign-in pe-3"></i>Check-In</h4>
 <table class='table table-sm table-striped table-bordered'>
   <tbody>
     <tr><td>Check-in time</td><td><%= @booking.check_in_time.strftime("%H:%M") %></td></tr>
-    <tr><td>Key Location</td> <td> <%= @booking.apartment.address %> </td></tr>
+
+    <% if @booking.apartment.key %>
+      <tr><td>Keynest Name</td> <td> <%= @booking.apartment.key.store_name  %> </td></tr>
+      <tr><td>Keynest Address</td> <td> <%= @booking.apartment.store_address  %> </td></tr>
+      <tr><td>Keynest Store Times</td> <td> <%= @booking.apartment.store_times %> </td></tr>
+      <tr><td>Keynest Latitude/Longitude</td> <td> <%= @booking.apartment.key.latitude %>/<%= @booking.apartment.key.longitude %> </td></tr>
+    <% else %>
+    <tr><td>Key Access</td> <td> Lockbox (<a target="_blank" href="<%= @booking.guest_app_url %>">click to open guide</a>) </td></tr>
+    <% end %>
     <tr><td>Flat address</td> <td> <%= @booking.apartment.address %> </td></tr>
+
   </tbody>
 </table>
 
 
-<tr><td>WiFi Name</td> <td> <%= @booking.apartment.wifi_name %> </td></tr>
+<h4 class='py-3'><i class="fa fa-parking pe-3"></i>Parking</h4>
+<div class="alert alert-warning">
+  Please click <a target="_blank" href='<%= @booking.guest_app_url %>'>here</a> for guidance.
+</div>
+
+
+<h4 class='py-3'><i class="fa fa-bed pe-3"></i>During your stay</h4>
+<table class='table table-sm table-striped table-bordered'>
+  <tbody>
+    <tr><td>Check-out time</td><td>
+      <div class="d-flex justify-content-between">
+      <div><%= @booking.check_out_time.strftime("%H:%M") %></div>
+      <a href='#'>Add late check-out</a>
+      </div>
+    </td></tr>
+    <tr><td>WiFi Name</td> <td> <%= @booking.apartment.wifi_name %> </td></tr>
     <tr><td>WiFi Password</td> <td> <%= @booking.apartment.wifi_password %> </td></tr>
+  </tbody>
+</table>
+
+<h4 class='py-3'><i class="fa fa-sign-out pe-3"></i>Check-Out</h4>
+<table class='table table-sm table-striped table-bordered'>
+  <tbody>
+    <tr><td>Check-out time</td><td>
+      <div class="d-flex justify-content-between">
+      <div><%= @booking.check_out_time.strftime("%H:%M") %></div>
+      <a href='#'>Add late check-out</a>
+      </div>
+    </td></tr>
+    <tr><td colspan=2 align="center" class='bg-warning'><b>Reminder check-list</b></td></tr>
+    <tr><td>Check-out</td> <td>On time (<%= @booking.check_out_time.strftime("%H:%M") %>)</td></tr>
+    <tr><td>Lights</td> <td>Switched off</td></tr>
+    <tr><td>Dirty towels</td> <td>In the bathtub</td></tr>
+    <tr><td>Dirty dishes</td> <td>Washed/In the sink</td></tr>
+    <tr><td>Rubbish</td> <td>In the bin</td></tr>
+    <tr><td>Taps</td> <td>Shut</td></tr>
+    <tr><td>Fridge</td> <td>Emptied of your goods</td></tr>
+    <tr><td>Heating</td> <td>Switched off</td></tr>
+    <tr><td>Your belongings</td> <td>Taken with you</td></tr>
+    <tr><td>Windows</td> <td>Shut</td></tr>
+    <tr><td>Door</td> <td>Locked</td></tr>
+    <tr><td>Key</td> <td>Put back</td></tr>
+  </tbody>
+</table>
 
 
 <div class="py-2 d-flex justify-content-center text-success">
@@ -40,5 +91,77 @@
 </div>
 
 <div class="d-grid gap-2">
-  <button class="btn btn-primary"><a class="text-white no-underline" target="_blank" href="<%= @booking.guest_app_url %>">Guest Check-In Guide</a></button>
+  <button class="btn btn-primary"><a class="text-white text-decoration-none" target="_blank" href="<%= @booking.guest_app_url %>">Guest Check-In Guide <i class="fa fa-map"></i></a></button>
+  <button class="btn btn-secondary"><a class="text-white text-decoration-none" target="_blank" href=<%="/guests/#{@reservation_id}/#{@code}/extras" %>>Purchase Extras <i class="fa fa-gift"></i></a></button>
+  <button class="btn btn-warning mb-3" id="complaint">Help Us Improve <i class="fa fa-exclamation-circle"></i></button>
 </div>
+
+
+<script>
+
+  document.querySelector("#complaint").addEventListener('click', function() {
+
+    Swal.fire({
+        title: 'We’d love your feedback!',
+        html:
+          `<div class="mb-3 text-start">
+            <label for="swal-regarding" class="form-label">What is it regarding:</label>
+            <select id="swal-regarding" class="form-select">
+              <option value="" disabled selected>Select an option</option>
+              <option value="General Feedback">General Feedback</option>
+              <option value="Listing">Listing</option>
+              <option value="Staff">Staff</option>
+              <option value="Check-In">Check-In</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Check-out">Check-out</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="mb-3 text-start">
+            <label for="swal-experience" class="form-label">Tell us your experience:</label>
+            <textarea id="swal-experience" class="form-control" rows="4" placeholder="Your feedback here..." maxlength=500></textarea>
+          </div>`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Submit Feedback',
+        preConfirm: () => {
+          const regarding = document.getElementById('swal-regarding').value;
+          const experience = document.getElementById('swal-experience').value;
+
+          if (!regarding || !experience.trim()) {
+            Swal.showValidationMessage('Please complete both fields');
+            return false;
+          }
+
+          return { regarding, experience };
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(url + "complaint", {
+              method: 'POST',
+              headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+              body: JSON.stringify({
+                booking_id: <%= @booking.id || 0 %>,
+                regarding: result.value.regarding,
+                complaint_body: result.value.experience,
+              })
+            }).then(response => {
+              if (response.ok) return response.json()
+            }).then(json => { 
+
+              Swal.fire(json.title, json.body, json.status)
+
+            });
+
+        }
+      });
+
+
+  });
+
+
+
+</script>

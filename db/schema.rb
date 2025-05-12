@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_12_191923) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_12_200317) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -148,6 +148,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_12_191923) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "complaints", force: :cascade do |t|
+    t.bigint "booking_id"
+    t.string "regarding"
+    t.text "complaint_body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_complaints_on_booking_id"
   end
 
   create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
