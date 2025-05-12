@@ -22,11 +22,29 @@ class KeynestApi < Api
           apartment_id: apt_id
         })
 
-        the_key.update({
+        update_hash = {
           status_type: key['StatusType'],
           last_movement: key['LastMovement'],
           current_status: key['CurrentStatus'],
-        })
+        }
+
+        storeId = key['CurrentOrLastStoreID']
+
+        if storeId && the_key.store_name.nil?
+          response = conn.get("https://api.keynest.com/api/v3/KeyNests?StoreId=#{storeId}", {} ) { |req| req.headers['ApiKey'] = api_key }
+          response = JSON.parse(response.body) if response.success?
+          store = response['ResponsePacket']['StoreList']&.first || nil
+          
+          if store 
+            update_hash[:store_name] = store['StoreName']
+            update_hash[:store_address] = store['StoreStreetAddress']
+            update_hash[:store_times] = store['StoreTime']
+            update_hash[:store_lat] = store['Latitude']
+            update_hash[:store_lng] = store['Longitude']
+          end 
+        end 
+
+        the_key.update(update_hash)
 
         # get drop off codes 
         update_dropoff_codes(the_key.key_id)
