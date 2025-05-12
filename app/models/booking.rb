@@ -84,8 +84,8 @@ class Booking < ApplicationRecord
   end
 
   def self.search(str) 
-    Booking.where("firstname like ? or lastname like ? or email like ? or phone like ? or arrival::text like ? or departure::text like ? or guest_input_email like ? or email like ? ",
-    *["%#{str}%"] * 8)
+    Booking.where("guest_name like ? firstname like ? or lastname like ? or email like ? or phone like ? or arrival::text like ? or departure::text like ? or guest_input_email like ? or email like ? ",
+    *["%#{str}%"] * 9)
   end
 
   def self.find_by_reservation_id(reservation_id)
