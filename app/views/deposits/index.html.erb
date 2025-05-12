@@ -1,5 +1,10 @@
-<div class="d-flex align-items-center pb-5">
-  <h3 class='pe-3'><%= @upcoming_bookings.count %> Upcoming bookings</h3> <h5>(Next 48h)</h5>
+<div class="d-flex justify-content-between pb-5">
+  <div class="d-flex align-items-center">
+      <h3 class='pe-3'><%= @upcoming_bookings.count %> Upcoming bookings</h3> <h5>(Next 48h)</h5>
+  </div>
+  <div>
+    <button id="btn-new-booking" class="btn btn-primary"><i class="fa fa-plus"></i> Create booking</button>
+  </div>
 </div>
 
 <table class='table table-striped'>
@@ -33,8 +38,8 @@
 
 <h3 class='py-5'>All bookings</h3>
 <label for="">Find a booking</label>
-<form action="" class="d-flex">
-  <input type="text" placeholder="Search by forename, surname, email, or telephone." class="form-control rounded-end-0">
+<form method="get" action="/deposits" class="d-flex">
+  <input type="text" placeholder="Search by firstname, lastname, email, phone, arrival date, departure date, or email" class="form-control rounded-end-0" name="search" id="search" value="<%= @search || '' %>">
   <button class="btn btn-primary rounded-start-0" type="submit">Search</button>
 </form>
 
@@ -70,6 +75,217 @@
 
 
 <script>
+  document.querySelector('#btn-new-booking').addEventListener('click', function() {
+    const bookingData = {}; // store data across steps
+
+    const steps = [
+      {
+        title: 'Guest Details',
+        html: `
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-adults">Number of Adults</label>
+            <input type="number" id="swal-input-adults" class="form-control" min="1" max="10">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-children">Number of Children</label>
+            <input type="number" id="swal-input-children" class="form-control" min="0" max="10">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-firstname">Guest First Name</label>
+            <input type="text" id="swal-input-firstname" class="form-control">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-lastname">Guest Last Name</label>
+            <input type="text" id="swal-input-lastname" class="form-control">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-phone">Telephone</label>
+            <input type="tel" id="swal-input-phone" class="form-control">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-email">Email</label>
+            <input type="email" id="swal-input-email" class="form-control">
+          </div>
+        `,
+        didOpen: () => {
+          document.getElementById('swal-input-adults').value = bookingData.adults || '';
+          document.getElementById('swal-input-children').value = bookingData.children || '';
+          document.getElementById('swal-input-firstname').value = bookingData.firstname || '';
+          document.getElementById('swal-input-lastname').value = bookingData.lastname || '';
+          document.getElementById('swal-input-phone').value = bookingData.phone || '';
+          document.getElementById('swal-input-email').value = bookingData.email || '';
+        },
+        preConfirm: () => {
+          const adults = document.getElementById('swal-input-adults').value;
+          const children = document.getElementById('swal-input-children').value;
+          const firstname = document.getElementById('swal-input-firstname').value;
+          const lastname = document.getElementById('swal-input-lastname').value;
+          const phone = document.getElementById('swal-input-phone').value;
+          const email = document.getElementById('swal-input-email').value;
+
+          if (!adults || !firstname || !lastname || !phone || !email) {
+            Swal.showValidationMessage('Please fill out all required fields.');
+          }
+
+          bookingData.adults = adults;
+          bookingData.children = children;
+          bookingData.firstname = firstname;
+          bookingData.lastname = lastname;
+          bookingData.phone = phone;
+          bookingData.email = email;
+        }
+      },
+      {
+        title: 'Property & Dates',
+        html: `
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-property">Property</label>
+            <select id="swal-input-property" class="form-control">
+              <option value="">Select Property</option>
+              <option value="2065531">Casa Sage</option>
+              <option value="2127221">Casa Grey</option>
+              <option value="2188506">Casa Pearl</option>
+            </select>
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-checkin">Check-In Date</label>
+            <input type="date" id="swal-input-checkin" class="form-control">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-checkout">Check-Out Date</label>
+            <input type="date" id="swal-input-checkout" class="form-control">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-arrival-time">Arrival Time</label>
+            <input type="time" id="swal-input-arrival-time" class="form-control" value="15:00">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-departure-time">Departure Time</label>
+            <input type="time" id="swal-input-departure-time" class="form-control" value="11:00">
+          </div>
+        `,
+        didOpen: () => {
+          const today = (new Date()).toISOString().split('T')[0];
+          document.getElementById('swal-input-checkin').setAttribute('min', today);
+          document.getElementById('swal-input-checkout').setAttribute('min', today);
+
+          document.getElementById('swal-input-property').value = bookingData.apartment_id || '';
+          document.getElementById('swal-input-checkin').value = bookingData.arrival || '';
+          document.getElementById('swal-input-checkout').value = bookingData.departure || '';
+          document.getElementById('swal-input-arrival-time').value = bookingData.arrival_time || '15:00';
+          document.getElementById('swal-input-departure-time').value = bookingData.departure_time || '11:00';
+        },
+        preConfirm: () => {
+          const property = document.getElementById('swal-input-property').value;
+          const arrival = document.getElementById('swal-input-checkin').value;
+          const departure = document.getElementById('swal-input-checkout').value;
+          const arrival_time = document.getElementById('swal-input-arrival-time').value;
+          const departure_time = document.getElementById('swal-input-departure-time').value;
+
+          if (!property || !arrival || !departure) {
+            Swal.showValidationMessage('Please fill out all required fields.');
+          }
+
+          bookingData.apartment_id = property;
+          bookingData.arrival = arrival;
+          bookingData.departure = departure;
+          bookingData.arrival_time = arrival_time;
+          bookingData.departure_time = departure_time;
+        }
+      },
+      {
+        title: 'Prices',
+        html: `
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-price">Total Price (£)</label>
+            <input type="number" id="swal-input-price" class="form-control" min="0" step="0.01">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-deposit">Deposit (£)</label>
+            <input type="number" id="swal-input-deposit" class="form-control" min="0" step="0.01">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-cleaning-fee">Cleaning Fee (£)</label>
+            <input type="number" id="swal-input-cleaning-fee" class="form-control" min="0" step="0.01">
+          </div>
+          <div class="form-group text-start mb-2">
+            <label for="swal-input-notice">Special Requests / Notice</label>
+            <textarea id="swal-input-notice" class="form-control" rows="2" placeholder="e.g. Bringing a dog, need a baby cot"></textarea>
+          </div>
+        `,
+        didOpen: () => {
+          document.getElementById('swal-input-price').value = bookingData.price || '';
+          document.getElementById('swal-input-deposit').value = bookingData.deposit || '';
+          document.getElementById('swal-input-cleaning-fee').value = bookingData.cleaning_fee || '';
+          document.getElementById('swal-input-notice').value = bookingData.notice || '';
+        },
+        preConfirm: () => {
+          bookingData.price = document.getElementById('swal-input-price').value;
+          bookingData.deposit = document.getElementById('swal-input-deposit').value;
+          bookingData.cleaning_fee = document.getElementById('swal-input-cleaning-fee').value;
+          bookingData.notice = document.getElementById('swal-input-notice').value;
+        }
+      }
+    ];
+
+    let currentStep = 0;
+
+    const showStep = () => {
+      Swal.fire({
+        title: steps[currentStep].title,
+        html: steps[currentStep].html,
+        customClass: {
+          popup: 'text-start'
+        },
+        focusConfirm: false,
+        confirmButtonText: currentStep === steps.length - 1 ? 'Submit' : 'Next',
+        showCancelButton: currentStep > 0,
+        cancelButtonText: 'Back',
+        preConfirm: steps[currentStep].preConfirm,
+        didOpen: steps[currentStep].didOpen
+      }).then((result) => {
+        if (result.isConfirmed) {
+          currentStep++;
+          if (currentStep < steps.length) {
+            showStep();
+          } else {
+            // Submit to backend
+            fetch('/bookings', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              },
+              body: JSON.stringify({ booking: bookingData })
+            }).then(response => {
+              return response.json();
+            }).then(data => {
+
+              if(data.status == 'success') {
+                Swal.fire('Created!', 'Your booking has been created.', 'success');  
+              } else if (data.status == 'error') {
+                Swal.fire('Not created!', data.msg, 'error').then(() => {
+                  currentStep = 0;
+                  showStep();
+                });
+              }
+
+            }).catch(error => {
+              console.log(error);
+              Swal.fire('Error', 'Network error occurred.', 'error');
+            });
+          }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          currentStep--;
+          showStep();
+        }
+      });
+    };
+
+    showStep();
+  });
+
+
 
   function buildLogsTable(arr){
 

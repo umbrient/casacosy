@@ -40,6 +40,25 @@ class ApplicationController < ActionController::Base
       end
     end
   end
+  
+  def extract_validation_messages(payload)
+    messages = []
+  
+    if payload["validation_messages"].present?
+      payload["validation_messages"].each do |field, sub_messages|
+        if sub_messages.is_a?(Hash)
+          sub_messages.each do |_subfield, message|
+            messages << message
+          end
+        elsif sub_messages.is_a?(String)
+          messages << sub_messages
+        end
+      end
+    end
+  
+    messages
+  end
+  
 
   def sync_transactions 
     starling_api.get_transactions

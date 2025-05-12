@@ -83,6 +83,11 @@ class Booking < ApplicationRecord
     previous_bookings_count >= 5
   end
 
+  def self.search(str) 
+    Booking.where("firstname like ? or lastname like ? or email like ? or phone like ? or arrival::text like ? or departure::text like ? or guest_input_email like ? or email like ? ",
+    *["%#{str}%"] * 8)
+  end
+
   def self.find_by_reservation_id(reservation_id)
     Booking.find_by("guest_app_url LIKE ?", "%#{reservation_id}%")
   end
@@ -120,7 +125,8 @@ class Booking < ApplicationRecord
     if apartment.key
      keynest_code
     else 
-      code || lockbox_code || generate_lockbox_code
+      '3316'
+      # code || lockbox_code || generate_lockbox_code
     end 
   end
 

@@ -6,8 +6,7 @@ class SmoobuApi < Api
   def initialize; end
 
   def get_all_past_reservations 
-    bookings = []
-    
+    bookings = []    
     page = 1
     from_date = Booking.all.order(data_created_at: :desc).first&.data_created_at&.strftime('%Y-%m-%d') || '2023-01-01'
     loop do 
@@ -21,11 +20,7 @@ class SmoobuApi < Api
     new_bookings = []
 
     if bookings
-
-      updates = 0
-
       bookings.flatten.each do |booking| 
-
         unless Apartment.find_by(id: booking['apartment']['id'])
           Apartment.create(id: booking['apartment']['id'], name: booking['apartment']['name'])
         end
@@ -34,22 +29,83 @@ class SmoobuApi < Api
           Channel.create(id: booking['channel']['id'], name: booking['channel']['name'])
         end
 
-        if Booking.find_by(reference_id: booking['reference-id']) 
+        reservation_id = booking['guest-app-url'].split('b=').last
+
+        if (!booking['reference-id'].nil? && Booking.find_by(reference_id: booking['reference-id'])) || Booking.find_by('guest_app_url like ?', "%b=#{reservation_id}")
           existing = Booking.find_by(reference_id: booking['reference-id']) 
           if something_different?(booking, existing)
-            updates += 1
             Rails.logger.info "Something has changed with reservation ID #{existing.reservation_id}"
             existing.update(booking_object(booking, existing))
           end 
           next
         end
+
         new_bookings << booking_object(booking)
+
       end
     end
 
     Booking.create(new_bookings)
     
   end
+
+  def create_booking(booking)
+    booking = OpenStruct.new(booking)
+    payload = {
+      arrivalDate: booking.arrival.to_s,
+      departureDate: booking.departure.to_s,
+      channelId: Channel.find_by(name: 'Direct booking').id,
+      apartmentId: booking.apartment_id,
+      arrivalTime: booking.arrival_time || "15:00",
+      departureTime: booking.departure_time || "11:00",
+      firstName: booking.firstname,
+      lastName: booking.lastname,
+      email: booking.email,
+      phone: booking.phone,
+      notice: booking.notice || "",
+      adults: booking.adults,
+      children: booking.children || 0,
+      price: (booking.price.to_f + booking.cleaning_fee.to_f), # total price INCLUDING cleaning
+      priceStatus: 1,
+      deposit: booking.deposit || 0,
+      depositStatus: 1,
+      language: "en",
+      priceElements: [
+        {
+          type: "basePrice",
+          name: "Base price",
+          amount: booking.price.to_f,
+          quantity: nil,
+          tax: nil,
+          currencyCode: "EUR",
+          sortOrder: 1
+        },
+        {
+          type: "cleaningFee",
+          name: "Cleaning Fee",
+          amount: booking.cleaning_fee.to_f,
+          quantity: nil,
+          tax: nil,
+          currencyCode: "EUR",
+          sortOrder: 2
+        }
+      ]
+    }
+  
+    response = conn.post("/api/reservations") do |req|
+      req.headers['Api-Key'] = api_key
+      req.headers['Content-Type'] = 'application/json'
+      req.body = payload.to_json
+    end
+  
+    if response.success?
+      JSON.parse(response.body)
+    else
+      Rails.logger.error "Failed to create booking in Smoobu: #{response.status} #{response.body}"
+      JSON.parse(response.body)
+    end
+  end
+  
 
   def get_messages(reservation_id)
     response = conn.get("/api/reservations/#{reservation_id}/messages?onlyRelatedToGuest=false" ) { |req| req.headers['Api-Key'] = api_key }

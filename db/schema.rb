@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_20_184235) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_04_175436) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -69,6 +69,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_20_184235) do
     t.integer "beds"
     t.integer "sofabeds"
     t.boolean "is_enabled", default: false
+    t.string "address"
+    t.string "wifi_name"
+    t.string "wifi_password"
   end
 
   create_table "booking_addon_options", force: :cascade do |t|

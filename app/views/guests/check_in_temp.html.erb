@@ -18,6 +18,9 @@
     <tr><th>Check-in time</th><td><%= @booking.check_in_time.strftime("%H:%M") %></td></tr>
     <tr><th>Check-out time</th><td><%= @booking.check_out_time.strftime("%H:%M") %></td></tr>
     <tr><th>Duration (Days: <%= (@booking.departure - @booking.arrival).to_i %>)</th><td><%= @booking.arrival.strftime("%d/%m/%y") %> - <%= @booking.departure.strftime("%d/%m/%y") %></td></tr>
+    <tr><th>Flat address</th> <td> <%= @booking.apartment.address %> </td></tr>
+    <tr><th>WiFi Name</th> <td> <%= @booking.apartment.wifi_name %> </td></tr>
+    <tr><th>WiFi Password</th> <td> <%= @booking.apartment.wifi_password %> </td></tr>
   </thead>
 </table>
 

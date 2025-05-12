@@ -60,7 +60,7 @@ class GuestsController < ActionController::Base
   def create_extras_intent
     total = @booking.booking_addon_options.unpaid.sum(:current_price_pennies).to_i
     description = @booking.booking_addon_options.unpaid.map { |ao| ao.addon.name }.join(', ')
-    payment_intent = stripe_api.create_payment_intent(amount_pennies: total, description: "Assorted extras - #{description}", capture: true)
+    payment_intent = stripe_api.create_payment_intent(amount_pennies: total, description: "Assorted extras - #{description} - #{@booking.guest_name} - #{@booking.apartment.name}", capture: true)
     render json: { client_secret: payment_intent.client_secret }
   rescue Stripe::StripeError => e
     render json: { error: e.message }, status: :unprocessable_entity
