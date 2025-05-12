@@ -52,7 +52,7 @@
     <tr><td>Check-out time</td><td>
       <div class="d-flex justify-content-between">
       <div><%= @booking.check_out_time.strftime("%H:%M") %></div>
-      <a href='#'>Add late check-out</a>
+      <a target="_blank" href=<%="/guests/#{@reservation_id}/#{@code}/extras" %>>Add late check-out</a>
       </div>
     </td></tr>
     <tr><td>WiFi Name</td> <td> <%= @booking.apartment.wifi_name %> </td></tr>
@@ -66,7 +66,7 @@
     <tr><td>Check-out time</td><td>
       <div class="d-flex justify-content-between">
       <div><%= @booking.check_out_time.strftime("%H:%M") %></div>
-      <a href='#'>Add late check-out</a>
+      <a target="_blank" href=<%="/guests/#{@reservation_id}/#{@code}/extras" %>>Add late check-out</a>
       </div>
     </td></tr>
     <tr><td colspan=2 align="center" class='bg-warning'><b>Reminder check-list</b></td></tr>
