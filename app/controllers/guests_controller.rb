@@ -106,6 +106,14 @@ class GuestsController < ActionController::Base
 
     @deposit_amount = @booking.deposit.to_f > 0 ? @booking.deposit.to_f : DEPOSIT_AMOUNT 
 
+    # `requests.request` meaning of the requests, get the top item from UNDONE/OPEN requests.
+    any_requests = @booking.requests.any? 
+
+    unless any_requests
+      SendRequestEmailsJob.new.perform_one(@booking)
+    end
+  
+
     @request = @booking.requests.request.first
 
     return render plain: "This link has expired." unless @request
