@@ -30,7 +30,7 @@
       <tr><td>Keynest Name</td> <td> <%= @booking.apartment.key.store_name  %> </td></tr>
       <tr><td>Keynest Address</td> <td> <%= @booking.apartment.key.store_address  %> </td></tr>
       <tr><td>Keynest Store Times</td> <td> <%= @booking.apartment.key.store_times %> </td></tr>
-      <tr><td>Keynest Latitude/Longitude</td> <td> <%= @booking.apartment.key.latitude %>/<%= @booking.apartment.key.longitude %> </td></tr>
+      <tr><td>Keynest Latitude/Longitude</td> <td> <%= @booking.apartment.key.store_lat %>/<%= @booking.apartment.key.store_lng %> </td></tr>
     <% else %>
     <tr><td>Key Access</td> <td> Lockbox (<a target="_blank" href="<%= @booking.guest_app_url %>">click to open guide</a>) </td></tr>
     <% end %>
