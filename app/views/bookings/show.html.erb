@@ -88,6 +88,38 @@
 <% if current_user.is_manager? || current_user.is_admin? %>
 <div class="row">
 
+
+  <% if @booking.booking_addon_options.any? %>
+  <div class="col-12 mb-3">
+    <div class="card">
+      <div class="card-header">
+        Extras Purchased
+      </div>
+      <div class="card-body">
+        <table class="table table-sm table-striped ">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Time Purchased</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @booking.booking_addon_options.each do |bao| %>
+              <tr>
+                <td><%= bao.addon.name %> (<%= bao.addon_option.description %>)</td>
+                <td>£<%= sprintf('%.2f', (bao.current_price_pennies / 100).to_f.round(2)) %></td>
+                <td><%= bao.created_at.strftime('%-d/%m/%Y at %H:%M:%S %p') %></td>
+
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
   <div class="col">
     <div class="card">
       <div class="card-header">
