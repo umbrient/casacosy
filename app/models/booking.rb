@@ -104,6 +104,7 @@ class Booking < ApplicationRecord
 
   def auth_code 
     messages = SmoobuApi.new.get_messages(reservation_id)
+    return unless messages
     codes = messages['messages'].join.to_s.scan /\/#{reservation_id}\/(\d{4})/
     code = codes.flatten.compact.uniq.first.to_i
     (code.zero? || code.nil?) ? 1234 : code
@@ -133,7 +134,10 @@ class Booking < ApplicationRecord
 
   # legacy
   def code
+    
     messages = SmoobuApi.new.get_messages(reservation_id)
+    
+    return unless messages 
     codes = messages['messages'].join.to_s.scan /PIN =&nbsp\;(\d{4})|code below *(\d{6})|PIN :(\d{4})|PIN is:(\d{4})|Code: (\d{6})|(\d{6})<\/b>/
     code = codes.flatten.compact.uniq.first
     # sage: PIN = 0000
