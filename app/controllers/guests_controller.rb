@@ -125,7 +125,7 @@ class GuestsController < ActionController::Base
     force_step = params[:step].to_s
 
     # return render "check_in_instructions"
-    if @booking.requests.request.not_expired.none? && force_step.nil?
+    if @booking.requests.request.not_expired.none? && force_step.blank?
       # either has no requests or bro is ready.
       
       # generate a new keycode?      
