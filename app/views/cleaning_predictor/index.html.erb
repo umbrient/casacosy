@@ -17,10 +17,22 @@
   <div class="row">
     <div class="col">
       <div class="d-flex align-items-center">
-          <h3 class="my-3 me-3">Cleans Determiner</h3>
+          <h3 class="my-3 me-3">Cleans Predictor</h3>
       </div>
     </div>
   </div>
+
+
+  <% if @extras.any? %>  
+    <div class="alert alert-warning">
+      <i class="fa fa-bell"></i>  Early/Late check-outs purchased on booking(s): 
+      <% @extras.each do |e| %>
+        <div>
+          <a target="_blank" href="/bookings/<%= e.booking_id %>"><%= e.booking.guest_name %> (<%= e.addon_option.description %>)</a>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 
     <% @apartments.each do |a| %>
 

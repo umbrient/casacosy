@@ -7,6 +7,8 @@ class CleaningPredictorController < ApplicationController
     sync_keys rescue nil 
     release_deposits rescue nil 
   
+    @extras = BookingAddonOption.where('created_at > ?', 1.day.ago)
+
     @apartments = Apartment.all.order(sort_order: :asc)
     @today = params[:date].nil? ? Date.today : params[:date].to_date
     @todays_day = @today.strftime("%A") 
