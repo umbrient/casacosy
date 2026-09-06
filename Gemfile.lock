@@ -207,7 +207,6 @@ GEM
       timeout
     net-smtp (0.5.0)
       net-protocol
-    newrelic_rpm (9.14.0)
     nio4r (2.7.3)
     nokogiri (1.16.5-x86_64-linux)
       racc (~> 1.4)
@@ -356,7 +355,6 @@ DEPENDENCIES
   jbuilder
   jsbundling-rails
   letter_opener_web
-  newrelic_rpm
   nokogiri
   pg (~> 1.1)
   prawn
@@ -375,7 +373,7 @@ DEPENDENCIES
   will_paginate (~> 4.0)
 
 RUBY VERSION
-   ruby 3.1.2p20
+   ruby 3.1.7p261
 
 BUNDLED WITH
    2.3.22

@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+# Clear a stale server pid if the container was killed uncleanly.
+rm -f /app/tmp/pids/server.pid
+
+if [ -z "${RAILS_MASTER_KEY}" ] && [ ! -f /app/config/credentials/production.key ]; then
+  echo "WARNING: RAILS_MASTER_KEY is not set - encrypted credentials (Stripe, AWS, KeyNest, Starling) will be unavailable." >&2
+fi
+
+# Run migrations only when booting the web server.
+if [ "${1}" = "./bin/rails" ] && [ "${2}" = "server" ]; then
+  echo "==> Schema migrations"
+  ./bin/rails db:migrate
+  echo "==> Data migrations"
+  ./bin/rails data:migrate
+fi
+
+exec "${@}"
