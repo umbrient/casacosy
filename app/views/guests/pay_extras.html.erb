@@ -45,7 +45,7 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script defer>
-  const stripe = Stripe('<%= Rails.application.credentials.dig(:stripe, :publishable_key) %>');
+  const stripe = Stripe('<%= Rails.application.config.x.stripe_publishable_key %>');
 
   function back(){
     goToStep('extras');
